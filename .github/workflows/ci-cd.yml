@@ -15,6 +15,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: bitnami/postgresql:latest
+        env:
+          POSTGRESQL_USERNAME: docker
+          POSTGRESQL_PASSWORD: docker
+          POSTGRESQL_DATABASE: api_books
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U docker -d api_books"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://docker:docker@localhost:5432/api_books
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
