@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: booksapi
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: api_books
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data

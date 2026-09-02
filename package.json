@@ -1,0 +1,35 @@
+{
+  "name": "api-books",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
+  },
+  "keywords": [],
+  "type": "module",
+  "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@fastify/swagger": "^9.8.1",
+    "@fastify/swagger-ui": "^6.1.1",
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^26.4.0",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^1.0.0-rc.4",
+    "fastify": "^5.12.1",
+    "pg": "^8.23.0",
+    "psql": "^0.0.1",
+    "temporal-polyfill": "^1.0.4",
+    "typescript": "^5.9.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^1.0.0-rc.4",
+    "tsx": "^4.23.13",
+    "vitest": "^4.1.11"
+  }
+}
