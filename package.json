@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "lint": "eslint"
   },
   "keywords": [],
   "type": "module",
@@ -27,9 +28,13 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^1.0.0-rc.4",
+    "eslint": "^10.9.1",
+    "globals": "^17.12.0",
     "tsx": "^4.23.13",
+    "typescript-eslint": "^8.69.0",
     "vitest": "^4.1.11"
   }
 }
