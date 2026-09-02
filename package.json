@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "test": "vitest run",
-    "test:watch": "vitest watch",
-    "lint": "eslint"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "vitest",
+    "lint": "eslint . --ext .ts"
   },
   "keywords": [],
   "type": "module",
