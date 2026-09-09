@@ -10,3 +10,13 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: bitnami/redis:latest
+    container_name: booksapi-redis
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/bitnami/redis/data

@@ -1,6 +1,6 @@
 // repositories/drizzle/drizzle-users-repository.ts
-import { db } from "../../index";
-import { usersTable } from "../../infra/db/schema.js";
+import { db } from "../../../index";
+import { usersTable } from "../../../infra/db/schema";
 import { eq, or } from "drizzle-orm";
 import type { UsersRepository, CreateUserData, User } from "../users-repository";
 

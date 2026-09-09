@@ -13,6 +13,7 @@
   "keywords": [],
   "type": "module",
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
     "@fastify/cors": "^11.3.0",
     "@fastify/swagger": "^9.8.1",
     "@fastify/swagger-ui": "^6.1.1",
@@ -23,9 +24,11 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4",
     "fastify": "^5.12.1",
+    "fastify-type-provider-zod": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "psql": "^0.0.1",
+    "redis": "^6.2.1",
     "temporal-polyfill": "^1.0.4",
     "typescript": "^5.9.3",
     "zod": "^4.5.4"
@@ -39,5 +42,10 @@
     "tsx": "^4.23.13",
     "typescript-eslint": "^8.69.0",
     "vitest": "^4.1.11"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true
   }
 }

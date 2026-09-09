@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import type { SignUpBodySchema } from "../schemas/sign-up-schema";
-import { makeSignUpUseCase } from "../use-cases/factories/make-sign-up-usecase";
-import { UserAlreadyExistsError } from "../app/erros/user-already-exist-error.js";
+import { makeSignUpUseCase } from "../../../app/use-cases/factories/make-sign-up-usecase";
+import { UserAlreadyExistsError } from "../../../app/erros/user-already-exist-error.js";
 
 export async function signUpController(
   request: FastifyRequest<{ Body: SignUpBodySchema }>,

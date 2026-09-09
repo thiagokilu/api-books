@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { makeSignInUseCase } from "../use-cases/factories/make-sign-in-usecase";
+import { makeSignInUseCase } from "../../../app/use-cases/factories/make-sign-in-usecase";
 import type { SignInBodySchema } from "../schemas/sign-in-schema";
-import { InvalidCredentialsError } from "../app/erros/invalid-credentials-error";
+import { InvalidCredentialsError } from "../../../app/erros/invalid-credentials-error";
 
 export async function signInController(
   request: FastifyRequest<{ Body: SignInBodySchema }>,
@@ -12,18 +12,34 @@ export async function signInController(
 
     const signIn = makeSignInUseCase();
 
-    const { token } = await signIn({
+    const { accessToken, refreshToken } = await signIn({
       email,
       password,
     });
 
-    return reply.status(200).send({ message: "User logged in successfully", token });
+    reply.setCookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",  // Mude de "/refresh-token" para "/"
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return reply.status(200).send({
+      message: "User logged in successfully",
+      accessToken,
+    });
   } catch (error) {
     if (error instanceof InvalidCredentialsError) {
-      return reply.status(400).send({ error: error.message });
+      return reply.status(400).send({
+        error: error.message,
+      });
     }
 
     console.error("Error in signInController:", error);
-    return reply.status(500).send({ error: "Internal server error" });
+
+    return reply.status(500).send({
+      error: "Internal server error",
+    });
   }
 }
