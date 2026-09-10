@@ -4,6 +4,8 @@
 
 - `npm run dev` — start the development server
 
+test
+
 # api-books
 
 - [] RF01: O usuário deve conseguir criar uma conta.
