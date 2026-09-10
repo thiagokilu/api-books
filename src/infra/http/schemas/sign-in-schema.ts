@@ -6,16 +6,12 @@ export const signInSchema = z.object({
 });
 
 export const signInSuccessResponseSchema = z.object({
-  user: z.object({
-    id: z.string(),
-    email: z.string().email(),
-
-  }),
-  token: z.string()
-})
+  message: z.string(),
+  accessToken: z.string(),
+});
 
 export const signInErrorResponseSchema = z.object({
-  message: z.string(),
+  error: z.string(),
 });
 
 

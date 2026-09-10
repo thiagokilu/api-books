@@ -17,11 +17,21 @@ export async function signInController(
       password,
     });
 
+    //acess toke e refresh tokne no cookie
+
     reply.setCookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      path: "/",  // Mude de "/refresh-token" para "/"
+      path: "/", // Mude de "/refresh-token" para "/"
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    reply.setCookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/", // Mude de "/refresh-token" para "/"
       maxAge: 60 * 60 * 24 * 7,
     });
 

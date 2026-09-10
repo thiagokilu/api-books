@@ -11,6 +11,7 @@ export function signUpRoute(app: FastifyInstance) {
       response: {
         201: signUpSuccessResponseSchema,
         409: signUpErrorResponseSchema,
+        500: signUpErrorResponseSchema,
       }
   } }, signUpController);
 }

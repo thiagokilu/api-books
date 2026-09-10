@@ -3,7 +3,7 @@ import { signUpUseCase } from "../../../app/use-cases/sign-up-usecase";
 import { InMemoryUsersRepository } from "../../../app/repositories/in-memory/in-memory-users-repository";
 import { signInUseCase } from "../../../app/use-cases/sign-in-usecase";
 import { isAuth } from "./isAuth";
-import type { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest } from "fastify";
 import { UnauthorizedError } from "../../../app/erros/unauthorizedError-error";
 import jwt from "jsonwebtoken";
 
@@ -16,9 +16,6 @@ function makeRequest(authHeader?: string): FastifyRequest {
     },
   } as unknown as FastifyRequest;
 }
-
-const reply = {} as FastifyReply;
-
 
 describe("isAuth", () => {
   beforeEach(() => {
@@ -37,7 +34,7 @@ describe("isAuth", () => {
       usersRepository,
     );
 
-    const { token } = await signInUseCase(
+    const { accessToken } = await signInUseCase(
       {
         email: "john.doe@example.com",
         password: "password123",
@@ -45,9 +42,9 @@ describe("isAuth", () => {
       usersRepository,
     );
 
-    const request = makeRequest(`Bearer ${token}`);
+    const request = makeRequest(`Bearer ${accessToken}`);
 
-    await isAuth(request, reply);
+    await isAuth(request);
 
     expect(request.userId).toBeDefined();
   });
@@ -55,19 +52,19 @@ describe("isAuth", () => {
   it("should not be able to access protected route without token", async () => {
     const request = makeRequest();
 
-    await expect(isAuth(request, reply)).rejects.toThrow(UnauthorizedError);
+    await expect(isAuth(request)).rejects.toThrow(UnauthorizedError);
   });
 
   it("should not be able to access protected route with invalid token", async () => {
     const request = makeRequest(`Bearer invalid-token`);
 
-    await expect(isAuth(request, reply)).rejects.toThrow(UnauthorizedError);
+    await expect(isAuth(request)).rejects.toThrow(UnauthorizedError);
   });
 
   it("should not be able to access protected route with expired token", async () => {
     const fakeToken = jwt.sign({}, "outro-secret", { subject: "user-1" });
     const request = makeRequest(`Bearer ${fakeToken}`);
 
-    await expect(isAuth(request, reply)).rejects.toThrow(UnauthorizedError);
+    await expect(isAuth(request)).rejects.toThrow(UnauthorizedError);
   });
 });

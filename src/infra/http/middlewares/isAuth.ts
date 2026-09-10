@@ -8,24 +8,30 @@ interface TokenPayload extends JwtPayload {
 }
 
 export async function isAuth(request: FastifyRequest) {
+  console.log("cookies:", request.cookies);
+  console.log("authorization header:", request.headers.authorization);
+
   const authHeader = request.headers.authorization;
+  const tokenFromCookie = request.cookies?.accessToken;
 
-  if (!authHeader) {
-    throw new UnauthorizedError("Authorization header missing");
+  const token = authHeader
+    ? authHeader.replace(/^Bearer\s+/i, "")
+    : tokenFromCookie;
+
+  console.log("token final:", token);
+
+  if (!token) {
+    throw new UnauthorizedError("Token não fornecido");
   }
-
-  const token = authHeader.replace(/^Bearer\s+/i, "");
 
   try {
     const JWT_SECRET = String(process.env.JWT_SECRET);
-    const { sub } = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    console.log("decoded:", decoded);
 
-    if (!sub) {
-      throw new UnauthorizedError();
-    }
-
-    request.userId = sub;
-  } catch {
+    request.userId = decoded.sub;
+  } catch (err) {
+    console.log("erro no verify:", err); // <- isso vai te dizer o motivo real
     throw new UnauthorizedError();
   }
 }

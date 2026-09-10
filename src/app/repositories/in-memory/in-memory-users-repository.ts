@@ -35,4 +35,12 @@ export class InMemoryUsersRepository implements UsersRepository {
   async findById(id: string) {
     return this.items.find((user) => user.id === id) ?? null;
   }
+
+  async updatePassword(id: string, newHashedPassword: string): Promise<void> {
+    const user = this.items.find((item) => item.id === id);
+
+    if (user) {
+      user.password = newHashedPassword;
+    }
+  }
 }

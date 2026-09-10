@@ -15,6 +15,9 @@ import { signUpRoute } from "./infra/http/routes/sign-up-route";
 import { signInRoute } from "./infra/http/routes/sign-in-route";
 import { getUserProfileRoute } from "./infra/http/routes/get-user-profile-route";
 import { refreshTokenRoute } from "./infra/http/routes/refresh-token-route";
+import { forgotPasswordRoute } from "./infra/http/routes/forgot-password-route";
+import { requestPasswordRoute } from "./infra/http/routes/request-password-route";
+import { logoutRoute } from "./infra/http/routes/logout-route";
 
 const app = fastify();
 
@@ -66,6 +69,9 @@ typedApp.register(signUpRoute);
 typedApp.register(signInRoute);
 typedApp.register(getUserProfileRoute);
 typedApp.register(refreshTokenRoute);
+typedApp.register(forgotPasswordRoute);
+typedApp.register(requestPasswordRoute);
+typedApp.register(logoutRoute);
 
 const start = async () => {
   try {

@@ -2,7 +2,11 @@
 import { db } from "../../../index";
 import { usersTable } from "../../../infra/db/schema";
 import { eq, or } from "drizzle-orm";
-import type { UsersRepository, CreateUserData, User } from "../users-repository";
+import type {
+  UsersRepository,
+  CreateUserData,
+  User,
+} from "../users-repository";
 
 export class DrizzleUsersRepository implements UsersRepository {
   async create(data: CreateUserData): Promise<User> {
@@ -46,7 +50,10 @@ export class DrizzleUsersRepository implements UsersRepository {
     return result[0] ?? null;
   }
 
-  async findByEmailOrUsername(email: string, username: string): Promise<User | null> {
+  async findByEmailOrUsername(
+    email: string,
+    username: string,
+  ): Promise<User | null> {
     const result = await db
       .select()
       .from(usersTable)
@@ -64,5 +71,12 @@ export class DrizzleUsersRepository implements UsersRepository {
       .limit(1);
 
     return result[0] ?? null;
+  }
+
+  async updatePassword(id: string, newHashedPassword: string): Promise<void> {
+    await db
+      .update(usersTable)
+      .set({ password: newHashedPassword })
+      .where(eq(usersTable.id, id));
   }
 }

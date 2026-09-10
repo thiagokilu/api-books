@@ -12,10 +12,12 @@ export function signInRoute(app: FastifyInstance) {
     {
       schema: {
         body: signInSchema,
+        summary: "Sign in with email and password",
         tags: ["Auth"],
         response: {
           200: signInSuccessResponseSchema,
-          401: signInErrorResponseSchema,
+          400: signInErrorResponseSchema,
+          500: signInErrorResponseSchema,
         },
       },
     },

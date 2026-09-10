@@ -1,10 +1,9 @@
 import { z } from "zod";
 
-export const successRefreshTokenResponseSchema = z.object({
-  token: z.string(),
-  refreshToken: z.string(),
+export const refreshTokenSuccessResponseSchema = z.object({
+  accessToken: z.string(),
 });
 
-export const errorRefreshTokenResponseSchema = z.object({
+export const refreshTokenErrorResponseSchema = z.object({
   message: z.string(),
 });

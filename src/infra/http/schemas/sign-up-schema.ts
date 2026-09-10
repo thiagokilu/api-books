@@ -8,10 +8,12 @@ export const signUpSchema = z.object({
   bio: z.string().optional(),
 });
 
-export const signUpSuccessResponseSchema = z.object({}).strict();
+export const signUpSuccessResponseSchema = z.object({
+  message: z.string(),
+});
 
 export const signUpErrorResponseSchema = z.object({
-  message: z.string(),
+  error: z.string(),
 });
 
 export type SignUpBodySchema = z.infer<typeof signUpSchema>;
