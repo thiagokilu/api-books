@@ -10,7 +10,17 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 
 <div align="center">
 
-<img src="https://skillicons.dev/icons?i=nodejs,typescript,fastify,postgres,prisma,docker,githubactions,jest,git,github" />
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Fastify](https://img.shields.io/badge/Fastify-000000?style=for-the-badge&logo=fastify&logoColor=white)](https://fastify.dev/)
+[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-FF4438?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Zod](https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white)](https://zod.dev/)
+[![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://swagger.io/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
 
 </div>
 
@@ -24,10 +34,11 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 * **Zod** — Validação e tipagem de dados
 * **Resend** — Envio de e-mails
 
-### Banco de dados
+### Banco de dados e Cache
 
-* **PostgreSQL**
-* **Prisma ORM**
+* **PostgreSQL** — Banco de dados relacional
+* **Drizzle ORM** — ORM TypeScript-first
+* **Redis** — Cache e armazenamento em memória
 
 ### Testes e qualidade
 
