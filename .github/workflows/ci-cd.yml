@@ -31,25 +31,30 @@ jobs:
           --health-retries=5
         
       redis:
-          image: redis:latest
-          ports:
-            - 6379:6379
-          options: >-
-            --health-cmd="redis-cli ping"
-            --health-interval=10s
-            --health-timeout=5s
-            --health-retries=5
+        image: redis:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
-      env:
-        DATABASE_URL="postgresql://docker:docker@localhost:5432/api_books?schema=public"
-        JWT_SECRET="booksapi"
-        JWT_REFRESH_SECRET="booskapirefresh"
-        SALT_ROUNDS=10
-        REDIS_URL="redis://localhost:6379"
+    env:
+      DATABASE_URL: postgresql://docker:docker@localhost:5432/api_books?schema=public
+      JWT_SECRET: booksapi
+      JWT_REFRESH_SECRET: booskapirefresh
+      SALT_ROUNDS: 10
+      REDIS_URL: redis://localhost:6379
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -57,16 +62,11 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11
-
       - name: Install dependencies
         run: pnpm install
 
       - name: Run database migrations
-        run: pnpm drizzle-kit migrate
+        run: pnpm exec drizzle-kit migrate
 
       - name: Type check
         run: pnpm tsc --noEmit
