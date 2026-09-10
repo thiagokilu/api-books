@@ -22,7 +22,7 @@ describe("SignInUseCase", () => {
         password: "password123",
         bio: "I am John Doe",
       },
-      usersRepository, // ✅ Passado aqui
+      usersRepository,
     );
 
     const result = await signInUseCase(
@@ -34,10 +34,11 @@ describe("SignInUseCase", () => {
     );
 
     expect(result).toEqual({
-      token: expect.any(String),
+      accessToken: expect.any(String),
+      refreshToken: expect.any(String),
     });
 
-    const payload = verify(result.token, String(process.env.JWT_SECRET));
+    const payload = verify(result.accessToken, String(process.env.JWT_SECRET));
     expect(payload).toMatchObject({
       sub: expect.any(String),
     });
