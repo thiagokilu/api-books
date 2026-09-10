@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { InvalidCredentialsError } from "../erros/invalid-credentials-error";
-import {redis} from "../../infra/lib/redis"
+import { redis } from "../../infra/lib/redis";
 
 interface IRefreshTokenUseCaseRequest {
   refreshToken: string;
@@ -17,7 +17,7 @@ export async function refreshTokenUseCase({
   try {
     const payload = jwt.verify(
       refreshToken,
-      process.env.JWT_REFRESH_SECRET!
+      process.env.JWT_REFRESH_SECRET!,
     ) as jwt.JwtPayload;
 
     const userId = payload.sub;
@@ -26,11 +26,13 @@ export async function refreshTokenUseCase({
       throw new InvalidCredentialsError();
     }
 
-    // 2. Busca o refresh token armazenado no Redis 
-    const storedRefreshToken = await redis.get( `refresh-token:${userId}`, );
+    // 2. Busca o refresh token armazenado no Redis
+    const storedRefreshToken = await redis.get(`refresh-token:${userId}`);
 
-    // 3. Verifica se existe e se é o mesmo token 
-    if (!storedRefreshToken || storedRefreshToken !== refreshToken) { throw new InvalidCredentialsError(); }
+    // 3. Verifica se existe e se é o mesmo token
+    if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
+      throw new InvalidCredentialsError();
+    }
 
     // Gerar novo access token
     const accessToken = jwt.sign({}, process.env.JWT_SECRET!, {
@@ -45,7 +47,9 @@ export async function refreshTokenUseCase({
     });
 
     // Atualizar no Redis
-    await redis.set(`refresh-token:${userId}`, newRefreshToken, { EX: 60 * 30 });
+    await redis.set(`refresh-token:${userId}`, newRefreshToken, {
+      EX: 60 * 30,
+    });
 
     return { accessToken, refreshToken: newRefreshToken };
   } catch {
