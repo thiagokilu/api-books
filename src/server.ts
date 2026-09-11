@@ -18,6 +18,7 @@ import { refreshTokenRoute } from "./infra/http/routes/refresh-token-route";
 import { forgotPasswordRoute } from "./infra/http/routes/forgot-password-route";
 import { requestPasswordRoute } from "./infra/http/routes/request-password-route";
 import { logoutRoute } from "./infra/http/routes/logout-route";
+import { searchBooksRoute } from "./infra/http/routes/search-books-route";
 
 const app = fastify();
 
@@ -72,6 +73,7 @@ typedApp.register(refreshTokenRoute);
 typedApp.register(forgotPasswordRoute);
 typedApp.register(requestPasswordRoute);
 typedApp.register(logoutRoute);
+typedApp.register(searchBooksRoute);
 
 const start = async () => {
   try {
