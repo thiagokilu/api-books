@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Reset Password</title>
+  </head>
+
+  <body>
+    <h1>Reset password</h1>
+
+    <form id="reset-password-form">
+      <input id="password" type="password" placeholder="Nova senha" required />
+
+      <button type="submit">Reset password</button>
+    </form>
+
+    <script>
+      const form = document.querySelector("#reset-password-form");
+      const passwordInput = document.querySelector("#password");
+
+      function getTokenFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get("token");
+      }
+
+      const token = getTokenFromUrl();
+
+      if (!token) {
+        alert("Token não fornecido na URL.");
+        throw new Error("Token não fornecido na URL.");
+      }
+
+      console.log("Token:", token);
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const newPassword = passwordInput.value;
+
+        try {
+          const response = await fetch(
+            "http://localhost:3333/forgot-password",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                token,
+                newPassword,
+              }),
+            },
+          );
+
+          const data = await response.json();
+
+          console.log("Status:", response.status);
+          console.log("Response:", data);
+
+          if (!response.ok) {
+            throw new Error(data.message || "Erro ao resetar senha");
+          }
+
+          alert("Senha resetada com sucesso!");
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Erro ao resetar senha.");
+        }
+      });
+    </script>
+  </body>
+</html>

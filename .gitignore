@@ -1,7 +1,41 @@
+# Dependencies
 node_modules/
+
+# Production build
 dist/
+
+# Environment files
 .env
-.agents
-.claude
-.cursor
-.devin
+.env.*
+!.env.example
+
+# Database & Cache data (Docker volumes)
+postgres-data/
+redis-data/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage / Tests
+coverage/
+*.lcov
+
+# IDEs & System files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# AI Assistants
+.agents/
+.claude/
+.cursor/
+.devin/
