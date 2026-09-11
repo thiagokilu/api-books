@@ -10,6 +10,7 @@ export const searchBooksSuccessResponseSchema = z.object({
       title: z.string(),
       author_name: z.array(z.string()).optional(),
       publish_year: z.array(z.number()).optional(),
+      cover_i: z.number().optional(),
     }),
   ),
 });
