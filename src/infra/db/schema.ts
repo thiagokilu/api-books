@@ -81,3 +81,11 @@ export const passwordResetTokensTable = pgTable("password_reset_tokens", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const verificationTokensTable = pgTable("verification_tokens", {
+  id: uuid("id")
+    .primaryKey()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+});

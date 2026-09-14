@@ -19,21 +19,23 @@ import { forgotPasswordRoute } from "./infra/http/routes/forgot-password-route";
 import { requestPasswordRoute } from "./infra/http/routes/request-password-route";
 import { logoutRoute } from "./infra/http/routes/logout-route";
 import { searchBooksRoute } from "./infra/http/routes/search-books-route";
+import { addBookShelfRoute } from "./infra/http/routes/add-book-shelf-route";
+import { editUserProfileRoute } from "./infra/http/routes/edit-user-profile-route";
+import { requestVerificationEmailRoute } from "./infra/http/routes/request-verification-email-route";
+import { verifyEmailRoute } from "./infra/http/routes/verify-email-route";
 
 const app = fastify();
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
-const typedApp = app.withTypeProvider<ZodTypeProvider>();
-
-typedApp.register(cors, {
+app.register(cors, {
   origin: "*",
 });
 
-typedApp.register(cookie);
+app.register(cookie);
 
-typedApp.register(Swagger, {
+app.register(Swagger, {
   openapi: {
     info: {
       title: "API Books",
@@ -62,9 +64,11 @@ typedApp.register(Swagger, {
   transform: jsonSchemaTransform,
 });
 
-typedApp.register(SwaggerUI, {
+app.register(SwaggerUI, {
   routePrefix: "/docs",
 });
+
+const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
 typedApp.register(signUpRoute);
 typedApp.register(signInRoute);
@@ -74,6 +78,10 @@ typedApp.register(forgotPasswordRoute);
 typedApp.register(requestPasswordRoute);
 typedApp.register(logoutRoute);
 typedApp.register(searchBooksRoute);
+typedApp.register(addBookShelfRoute);
+typedApp.register(editUserProfileRoute);
+typedApp.register(requestVerificationEmailRoute);
+typedApp.register(verifyEmailRoute);
 
 const start = async () => {
   try {

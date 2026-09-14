@@ -14,6 +14,13 @@ export interface User {
   email: string;
   password: string;
   bio?: string | null;
+  emailVerified: boolean;
+}
+
+export interface VerificationToken {
+  id: string;
+  token: string;
+  expiresAt: Date;
 }
 
 export interface UsersRepository {
@@ -23,4 +30,13 @@ export interface UsersRepository {
   findById(id: string): Promise<User | null>;
   findByEmailOrUsername(email: string, username: string): Promise<User | null>;
   updatePassword(id: string, newHashedPassword: string): Promise<void>;
+  editProfile(id: string, data: Partial<CreateUserData>): Promise<User>;
+  saveVerificationToken(
+    id: string,
+    token: string,
+    expiresAt: Date,
+  ): Promise<void>;
+  markEmailAsVerified(id: string): Promise<void>;
+  findVerificationToken(token: string): Promise<VerificationToken | null>;
+  deleteVerificationToken(id: string): Promise<void>;
 }

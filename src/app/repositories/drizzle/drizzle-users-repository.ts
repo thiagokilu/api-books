@@ -1,12 +1,13 @@
 // repositories/drizzle/drizzle-users-repository.ts
 import { db } from "../../../index";
-import { usersTable } from "../../../infra/db/schema";
+import { usersTable, verificationTokensTable } from "../../../infra/db/schema";
 import { eq, or } from "drizzle-orm";
 import type {
   UsersRepository,
   CreateUserData,
   User,
 } from "../users-repository";
+import type { VerificationToken } from "../users-repository";
 
 export class DrizzleUsersRepository implements UsersRepository {
   async create(data: CreateUserData): Promise<User> {
@@ -78,5 +79,67 @@ export class DrizzleUsersRepository implements UsersRepository {
       .update(usersTable)
       .set({ password: newHashedPassword })
       .where(eq(usersTable.id, id));
+  }
+
+  async editProfile(id: string, data: Partial<CreateUserData>): Promise<User> {
+    const result = await db
+      .update(usersTable)
+      .set(data)
+      .where(eq(usersTable.id, id))
+      .returning();
+
+    const user = result[0];
+
+    if (!user) {
+      throw new Error("Failed to edit user profile");
+    }
+
+    return user;
+  }
+
+  async saveVerificationToken(
+    id: string,
+    token: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await db
+      .insert(verificationTokensTable)
+      .values({ id, token, expiresAt })
+      .onConflictDoUpdate({
+        target: [verificationTokensTable.id],
+        set: { token, expiresAt },
+      });
+  }
+  async markEmailAsVerified(id: string): Promise<void> {
+    await db
+      .update(usersTable)
+      .set({ emailVerified: true })
+      .where(eq(usersTable.id, id));
+  }
+
+  async findVerificationToken(
+    token: string,
+  ): Promise<VerificationToken | null> {
+    const result = await db
+      .select()
+      .from(verificationTokensTable)
+      .where(eq(verificationTokensTable.token, token))
+      .limit(1);
+
+    if (!result[0]) {
+      return null;
+    }
+
+    return {
+      id: result[0].id,
+      token: result[0].token,
+      expiresAt: result[0].expiresAt,
+    };
+  }
+
+  async deleteVerificationToken(id: string): Promise<void> {
+    await db
+      .delete(verificationTokensTable)
+      .where(eq(verificationTokensTable.id, id));
   }
 }
