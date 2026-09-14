@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import type {
   UsersRepository,
   CreateUserData,
+  EditProfileData,
   User,
 } from "../users-repository";
 
@@ -57,7 +58,7 @@ export class InMemoryUsersRepository implements UsersRepository {
     }
   }
 
-  async editProfile(id: string, data: Partial<CreateUserData>): Promise<User> {
+  async editProfile(id: string, data: EditProfileData): Promise<User> {
     const user = this.items.find((item) => item.id === id);
 
     if (!user) {
@@ -65,7 +66,6 @@ export class InMemoryUsersRepository implements UsersRepository {
     }
 
     Object.assign(user, data);
-
     return user;
   }
 

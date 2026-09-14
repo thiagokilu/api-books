@@ -5,6 +5,7 @@ import { eq, or } from "drizzle-orm";
 import type {
   UsersRepository,
   CreateUserData,
+  EditProfileData,
   User,
 } from "../users-repository";
 import type { VerificationToken } from "../users-repository";
@@ -81,7 +82,7 @@ export class DrizzleUsersRepository implements UsersRepository {
       .where(eq(usersTable.id, id));
   }
 
-  async editProfile(id: string, data: Partial<CreateUserData>): Promise<User> {
+  async editProfile(id: string, data: EditProfileData): Promise<User> {
     const result = await db
       .update(usersTable)
       .set(data)
