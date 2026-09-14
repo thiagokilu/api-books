@@ -5,6 +5,7 @@ import { eq, or } from "drizzle-orm";
 import type {
   UsersRepository,
   CreateUserData,
+  EditProfileData,
   User,
 } from "../users-repository";
 
@@ -78,5 +79,21 @@ export class DrizzleUsersRepository implements UsersRepository {
       .update(usersTable)
       .set({ password: newHashedPassword })
       .where(eq(usersTable.id, id));
+  }
+
+  async editProfile(id: string, data: EditProfileData): Promise<User> {
+    const result = await db
+      .update(usersTable)
+      .set(data)
+      .where(eq(usersTable.id, id))
+      .returning();
+
+    const user = result[0];
+
+    if (!user) {
+      throw new Error("Failed to edit user profile");
+    }
+
+    return user;
   }
 }

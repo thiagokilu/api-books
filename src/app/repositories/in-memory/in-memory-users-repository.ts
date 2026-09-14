@@ -1,6 +1,11 @@
 // repositories/in-memory/in-memory-users-repository.ts
 import { randomUUID } from "crypto";
-import type { UsersRepository, CreateUserData, User } from "../users-repository";
+import type {
+  UsersRepository,
+  CreateUserData,
+  EditProfileData,
+  User,
+} from "../users-repository";
 
 export class InMemoryUsersRepository implements UsersRepository {
   public items: User[] = [];
@@ -42,5 +47,16 @@ export class InMemoryUsersRepository implements UsersRepository {
     if (user) {
       user.password = newHashedPassword;
     }
+  }
+
+  async editProfile(id: string, data: EditProfileData): Promise<User> {
+    const user = this.items.find((item) => item.id === id);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    Object.assign(user, data);
+    return user;
   }
 }

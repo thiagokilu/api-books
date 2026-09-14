@@ -7,6 +7,8 @@ export interface CreateUserData {
   bio?: string | null;
 }
 
+export type EditProfileData = Partial<Pick<CreateUserData, "name" | "bio">>;
+
 export interface User {
   id: string;
   name: string;
@@ -23,4 +25,5 @@ export interface UsersRepository {
   findById(id: string): Promise<User | null>;
   findByEmailOrUsername(email: string, username: string): Promise<User | null>;
   updatePassword(id: string, newHashedPassword: string): Promise<void>;
+  editProfile(id: string, data: EditProfileData): Promise<User>;
 }
