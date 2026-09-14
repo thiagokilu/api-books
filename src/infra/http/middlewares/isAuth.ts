@@ -24,7 +24,7 @@ export async function isAuth(request: FastifyRequest) {
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
 
     request.userId = decoded.sub;
-  } catch (err) {
+  } catch {
     throw new UnauthorizedError();
   }
 }
