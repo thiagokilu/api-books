@@ -1,5 +1,5 @@
 import type {
-  CreateUserData,
+  EditProfileData,
   UsersRepository,
 } from "../repositories/users-repository";
 
@@ -28,7 +28,7 @@ export async function editUserProfileUseCase(
     throw new Error("User not found");
   }
 
-  const data: Partial<CreateUserData> = {};
+  const data: EditProfileData = {};
 
   if (name !== undefined) {
     data.name = name;

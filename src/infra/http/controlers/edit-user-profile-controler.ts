@@ -4,11 +4,11 @@ import { makeEditUserProfileUseCase } from "../../../app/use-cases/factories/mak
 import { stripUndefined } from "../../lib/stripUndefined";
 
 export async function editUserProfileController(
-  request: FastifyRequest<{ Body: EditUserProfileBodySchema }>,
+  request: FastifyRequest,
   reply: FastifyReply,
 ) {
   try {
-    const { name, bio } = request.body;
+    const { name, bio } = request.body as EditUserProfileBodySchema;
     const editUserProfile = makeEditUserProfileUseCase();
 
     const updatedUser = await editUserProfile(
