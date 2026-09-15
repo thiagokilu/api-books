@@ -1,35 +1,27 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InMemoryTokensRepository } from "../repositories/in-memory/in-memory-tokens-repository";
+import { describe, expect, it, vi } from "vitest";
+import { redis } from "../../infra/lib/redis";
 import { LogoutUseCase } from "./logout-usecase";
 
-let tokensRepository: InMemoryTokensRepository;
-
 describe("LogoutUseCase", () => {
-  beforeEach(() => {
-    tokensRepository = new InMemoryTokensRepository();
-  });
-
   it("should remove user refresh token from redis", async () => {
     const userId = "user-test-id";
-    await tokensRepository.saveRefreshToken(userId, "sample-refresh-token");
+    await redis.set(`refresh-token:${userId}`, "sample-refresh-token");
 
-    const tokenBeforeLogout = await tokensRepository.getRefreshToken(userId);
+    const tokenBeforeLogout = await redis.get(`refresh-token:${userId}`);
     expect(tokenBeforeLogout).toBe("sample-refresh-token");
 
-    await LogoutUseCase({ userId }, tokensRepository);
+    await LogoutUseCase({ userId });
 
-    expect(await tokensRepository.getRefreshToken(userId)).toBeNull();
+    const tokenAfterLogout = await redis.get(`refresh-token:${userId}`);
+    expect(tokenAfterLogout).toBeNull();
   });
 
-  it("should delete the refresh token for the user", async () => {
+  it("should call redis.del with the correct key", async () => {
     const userId = "another-user-id";
-    const deleteRefreshTokenSpy = vi.spyOn(
-      tokensRepository,
-      "deleteRefreshToken",
-    );
+    const delSpy = vi.spyOn(redis, "del");
 
-    await LogoutUseCase({ userId }, tokensRepository);
+    await LogoutUseCase({ userId });
 
-    expect(deleteRefreshTokenSpy).toHaveBeenCalledWith(userId);
+    expect(delSpy).toHaveBeenCalledWith(`refresh-token:${userId}`);
   });
 });

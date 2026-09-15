@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { InvalidCredentialsError } from "../erros/invalid-credentials-error";
-import type { TokensRepository } from "../repositories/tokens-repository";
+import { redis } from "../../infra/lib/redis";
 
 interface IRefreshTokenUseCaseRequest {
   refreshToken: string;
@@ -13,10 +13,7 @@ interface IRefreshTokenUseCaseResponse {
 
 export async function refreshTokenUseCase({
   refreshToken,
-  tokensRepository,
-}: IRefreshTokenUseCaseRequest & {
-  tokensRepository: TokensRepository;
-}): Promise<IRefreshTokenUseCaseResponse> {
+}: IRefreshTokenUseCaseRequest): Promise<IRefreshTokenUseCaseResponse> {
   try {
     const payload = jwt.verify(
       refreshToken,
@@ -30,7 +27,7 @@ export async function refreshTokenUseCase({
     }
 
     // 2. Busca o refresh token armazenado no Redis
-    const storedRefreshToken = await tokensRepository.getRefreshToken(userId);
+    const storedRefreshToken = await redis.get(`refresh-token:${userId}`);
 
     // 3. Verifica se existe e se é o mesmo token
     if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
@@ -50,7 +47,9 @@ export async function refreshTokenUseCase({
     });
 
     // Atualizar no Redis
-    await tokensRepository.saveRefreshToken(userId, newRefreshToken);
+    await redis.set(`refresh-token:${userId}`, newRefreshToken, {
+      EX: 60 * 30,
+    });
 
     return { accessToken, refreshToken: newRefreshToken };
   } catch {
