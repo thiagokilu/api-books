@@ -1,12 +1,10 @@
-import type { TokensRepository } from "../repositories/tokens-repository";
+import { redis } from "../../infra/lib/redis";
+
 export interface ILogoutUseCaseRequest {
   userId: string;
 }
 
-export async function LogoutUseCase(
-  { userId }: ILogoutUseCaseRequest,
-  tokensRepository: TokensRepository,
-) {
+export async function LogoutUseCase({ userId }: ILogoutUseCaseRequest) {
   // Remove o refresh token do Redis, invalidando a sessão
-  await tokensRepository.deleteRefreshToken(userId);
+  await redis.del(`refresh-token:${userId}`);
 }

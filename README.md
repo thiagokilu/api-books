@@ -26,31 +26,31 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 
 ### Backend
 
-- **Node.js** — Runtime JavaScript
-- **TypeScript** — Tipagem estática
-- **Fastify** — Framework web
-- **JWT** — Autenticação baseada em tokens
-- **bcrypt** — Hash de senhas
-- **Zod** — Validação e tipagem de dados
-- **Resend** — Envio de e-mails
+* **Node.js** — Runtime JavaScript
+* **TypeScript** — Tipagem estática
+* **Fastify** — Framework web
+* **JWT** — Autenticação baseada em tokens
+* **bcrypt** — Hash de senhas
+* **Zod** — Validação e tipagem de dados
+* **Resend** — Envio de e-mails
 
 ### Banco de dados e Cache
 
-- **PostgreSQL** — Banco de dados relacional
-- **Drizzle ORM** — ORM TypeScript-first
-- **Redis** — Cache e armazenamento em memória
+* **PostgreSQL** — Banco de dados relacional
+* **Drizzle ORM** — ORM TypeScript-first
+* **Redis** — Cache e armazenamento em memória
 
 ### Testes e qualidade
 
-- **Vitest** — Testes automatizados
-- **Swagger / OpenAPI** — Documentação da API
-- **ESLint** — Padronização e qualidade do código
+* **Vitest** — Testes automatizados
+* **Swagger / OpenAPI** — Documentação da API
+* **ESLint** — Padronização e qualidade do código
 
 ### DevOps
 
-- **Docker**
-- **GitHub Actions**
-- **Git / GitHub**
+* **Docker**
+* **GitHub Actions**
+* **Git / GitHub**
 
 ---
 
@@ -58,28 +58,28 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 
 ### 🔐 Autenticação
 
-- [x] Criar uma conta
-- [x] Fazer login
-- [x] Confirmar e-mail após o cadastro
-- [x] Enviar e-mail de confirmação via Resend
-- [x] Recuperar senha por e-mail
-- [x] Redefinir senha através de link enviado por e-mail
-- [x] Autenticação utilizando JWT
-- [x] Armazenamento seguro de senhas utilizando hash
+* [ ] Criar uma conta
+* [ ] Fazer login
+* [ ] Confirmar e-mail após o cadastro
+* [ ] Enviar e-mail de confirmação via Resend
+* [ ] Recuperar senha por e-mail
+* [ ] Redefinir senha através de link enviado por e-mail
+* [ ] Autenticação utilizando JWT
+* [ ] Armazenamento seguro de senhas utilizando hash
 
 ### 📖 Livros e estante
 
-- [x] Pesquisar livros por título ou autor
-- [x] Adicionar livros à estante
-- [ ] Remover livros da estante
-- [ ] Alterar status de leitura
-- [ ] Atualizar progresso de leitura
-- [ ] Calcular automaticamente o percentual de leitura
-- [ ] Exibir resumo da estante no dashboard
+* [ ] Pesquisar livros por título ou autor
+* [ ] Adicionar livros à estante
+* [ ] Remover livros da estante
+* [ ] Alterar status de leitura
+* [ ] Atualizar progresso de leitura
+* [ ] Calcular automaticamente o percentual de leitura
+* [ ] Exibir resumo da estante no dashboard
 
 ### 👤 Perfil
 
-- [x] Editar dados do perfil
+* [ ] Editar dados do perfil
 
 ---
 
@@ -87,20 +87,20 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 
 | ID   | Requisito                                                              | Status |
 | ---- | ---------------------------------------------------------------------- | :----: |
-| RF01 | O usuário deve conseguir criar uma conta.                              |   x    |
-| RF02 | O usuário deve conseguir fazer login.                                  |   x    |
-| RF03 | O sistema deve enviar um e-mail de confirmação após o cadastro.        |   x    |
-| RF04 | O usuário deve confirmar seu e-mail antes de acessar a estante.        |   x    |
-| RF05 | O usuário deve conseguir solicitar redefinição de senha por e-mail.    |   x    |
-| RF06 | O usuário deve conseguir redefinir sua senha através do link recebido. |   x    |
-| RF07 | O usuário deve conseguir pesquisar livros por título ou autor.         |   x    |
-| RF08 | O usuário deve conseguir adicionar um livro à sua estante.             |   x    |
-| RF09 | O usuário deve conseguir remover um livro da sua estante.              |   ⬜   |
-| RF10 | O usuário deve conseguir alterar o status de leitura.                  |   ⬜   |
-| RF11 | O usuário deve conseguir atualizar seu progresso de leitura.           |   ⬜   |
-| RF12 | O sistema deve calcular automaticamente o percentual de leitura.       |   ⬜   |
-| RF13 | O sistema deve exibir um resumo da estante no dashboard.               |   ⬜   |
-| RF14 | O usuário deve conseguir editar seus dados de perfil.                  |   x    |
+| RF01 | O usuário deve conseguir criar uma conta.                              |    ⬜   |
+| RF02 | O usuário deve conseguir fazer login.                                  |    ⬜   |
+| RF03 | O sistema deve enviar um e-mail de confirmação após o cadastro.        |    ⬜   |
+| RF04 | O usuário deve confirmar seu e-mail antes de acessar a estante.        |    ⬜   |
+| RF05 | O usuário deve conseguir solicitar redefinição de senha por e-mail.    |    ⬜   |
+| RF06 | O usuário deve conseguir redefinir sua senha através do link recebido. |    ⬜   |
+| RF07 | O usuário deve conseguir pesquisar livros por título ou autor.         |    ⬜   |
+| RF08 | O usuário deve conseguir adicionar um livro à sua estante.             |    ⬜   |
+| RF09 | O usuário deve conseguir remover um livro da sua estante.              |    ⬜   |
+| RF10 | O usuário deve conseguir alterar o status de leitura.                  |    ⬜   |
+| RF11 | O usuário deve conseguir atualizar seu progresso de leitura.           |    ⬜   |
+| RF12 | O sistema deve calcular automaticamente o percentual de leitura.       |    ⬜   |
+| RF13 | O sistema deve exibir um resumo da estante no dashboard.               |    ⬜   |
+| RF14 | O usuário deve conseguir editar seus dados de perfil.                  |    ⬜   |
 
 ---
 
@@ -108,10 +108,10 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 
 | ID    | Requisito                                                                        | Status |
 | ----- | -------------------------------------------------------------------------------- | :----: |
-| RNF01 | A aplicação deve ser responsiva.                                                 |   ⬜   |
-| RNF02 | Senhas devem ser armazenadas utilizando hash e a autenticação deve utilizar JWT. |   ⬜   |
-| RNF03 | A API deve retornar mensagens de erro padronizadas.                              |   ⬜   |
-| RNF04 | O projeto deve possuir testes automatizados e documentação via Swagger/OpenAPI.  |   ⬜   |
+| RNF01 | A aplicação deve ser responsiva.                                                 |    ⬜   |
+| RNF02 | Senhas devem ser armazenadas utilizando hash e a autenticação deve utilizar JWT. |    ⬜   |
+| RNF03 | A API deve retornar mensagens de erro padronizadas.                              |    ⬜   |
+| RNF04 | O projeto deve possuir testes automatizados e documentação via Swagger/OpenAPI.  |    ⬜   |
 
 ### Formato padrão de erro
 
@@ -150,12 +150,12 @@ src/
 
 A ideia é manter:
 
-- **Controllers** → entrada e saída das requisições
-- **Use Cases** → regras de negócio
-- **Repositories** → acesso aos dados
-- **Routes** → definição dos endpoints
-- **Schemas** → validação dos dados
-- **Middlewares** → autenticação e comportamentos compartilhados
+* **Controllers** → entrada e saída das requisições
+* **Use Cases** → regras de negócio
+* **Repositories** → acesso aos dados
+* **Routes** → definição dos endpoints
+* **Schemas** → validação dos dados
+* **Middlewares** → autenticação e comportamentos compartilhados
 
 ---
 
@@ -165,10 +165,10 @@ A ideia é manter:
 
 Antes de começar, você precisa ter instalado:
 
-- Node.js
-- npm
-- Docker
-- Docker Compose
+* Node.js
+* npm
+* Docker
+* Docker Compose
 
 ### 1. Clone o repositório
 
@@ -265,13 +265,13 @@ npm run test:coverage
 
 O projeto utiliza algumas práticas para proteger os dados dos usuários:
 
-- 🔐 Senhas armazenadas utilizando **bcrypt**
-- 🎫 Autenticação utilizando **JWT**
-- 🔄 Refresh Token
-- ✉️ Confirmação de e-mail
-- 🔑 Recuperação de senha através de token
-- ✅ Validação de dados utilizando **Zod**
-- 🚫 Proteção de rotas autenticadas
+* 🔐 Senhas armazenadas utilizando **bcrypt**
+* 🎫 Autenticação utilizando **JWT**
+* 🔄 Refresh Token
+* ✉️ Confirmação de e-mail
+* 🔑 Recuperação de senha através de token
+* ✅ Validação de dados utilizando **Zod**
+* 🚫 Proteção de rotas autenticadas
 
 ---
 
@@ -279,35 +279,35 @@ O projeto utiliza algumas práticas para proteger os dados dos usuários:
 
 ### Autenticação
 
-- [ ] Cadastro
-- [ ] Login
-- [ ] Refresh Token
-- [ ] Confirmação de e-mail
-- [ ] Recuperação de senha
-- [ ] Redefinição de senha
+* [ ] Cadastro
+* [ ] Login
+* [ ] Refresh Token
+* [ ] Confirmação de e-mail
+* [ ] Recuperação de senha
+* [ ] Redefinição de senha
 
 ### Biblioteca
 
-- [ ] Pesquisa de livros
-- [ ] Adicionar à estante
-- [ ] Remover da estante
-- [ ] Status de leitura
-- [ ] Progresso de leitura
-- [ ] Percentual automático
+* [ ] Pesquisa de livros
+* [ ] Adicionar à estante
+* [ ] Remover da estante
+* [ ] Status de leitura
+* [ ] Progresso de leitura
+* [ ] Percentual automático
 
 ### Usuário
 
-- [ ] Dashboard
-- [ ] Perfil
-- [ ] Estatísticas de leitura
+* [ ] Dashboard
+* [ ] Perfil
+* [ ] Estatísticas de leitura
 
 ### Qualidade
 
-- [ ] Testes unitários
-- [ ] Testes de integração
-- [ ] Cobertura de testes
-- [ ] CI/CD
-- [ ] Documentação completa da API
+* [ ] Testes unitários
+* [ ] Testes de integração
+* [ ] Cobertura de testes
+* [ ] CI/CD
+* [ ] Documentação completa da API
 
 ---
 

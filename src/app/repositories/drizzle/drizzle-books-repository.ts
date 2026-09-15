@@ -1,4 +1,3 @@
-import { and, eq } from "drizzle-orm/sql/expressions/index";
 import { db } from "../../../index";
 import { booksTable, userLibraryTable } from "../../../infra/db/schema";
 import type { addBookToShelf, BooksRepository } from "../books-repository";
@@ -36,30 +35,5 @@ export class DrizzleBooksRepository implements BooksRepository {
       .onConflictDoNothing({
         target: [userLibraryTable.userId, userLibraryTable.bookId],
       });
-  }
-
-  async removeBookFromShelf(data: {
-    userId: string;
-    cover_i: number;
-  }): Promise<void> {
-    const externalId = String(data.cover_i);
-
-    const book = await db.query.booksTable.findFirst({
-      where: { externalId },
-      columns: { id: true },
-    });
-
-    if (!book) {
-      throw new Error("Book not found");
-    }
-
-    await db
-      .delete(userLibraryTable)
-      .where(
-        and(
-          eq(userLibraryTable.userId, data.userId),
-          eq(userLibraryTable.bookId, book.id),
-        ),
-      );
   }
 }

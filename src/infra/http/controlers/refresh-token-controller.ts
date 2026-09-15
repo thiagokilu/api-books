@@ -1,5 +1,4 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { RedisTokensRepository } from "../../../app/repositories/redis/redis-token-repository";
 import { refreshTokenUseCase } from "../../../app/use-cases/refresh-token-usecase";
 
 export async function refreshTokenController(
@@ -10,14 +9,13 @@ export async function refreshTokenController(
 
   try {
     const { refreshToken } = request.cookies;
-    const tokensRepository = new RedisTokensRepository();
 
     if (!refreshToken) {
       return reply.status(401).send({ message: "Refresh token is required" });
     }
 
     const { accessToken, refreshToken: newRefreshToken } =
-      await refreshTokenUseCase({ refreshToken, tokensRepository });
+      await refreshTokenUseCase({ refreshToken });
 
     // 2. Atualizar o cookie no navegador com o novo token:
     reply.setCookie("refreshToken", newRefreshToken, {
