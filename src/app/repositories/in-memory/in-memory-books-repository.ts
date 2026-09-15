@@ -2,10 +2,11 @@ import type { addBookToShelf, BooksRepository } from "../books-repository";
 
 export class InMemoryBooksRepository implements BooksRepository {
   addBookToShelf(data: addBookToShelf): Promise<void> {
-    const { userId, cover_i } = data;
-    const userBooks = this.store.get(userId) ?? new Set<number>();
-    userBooks.add(cover_i);
-    this.store.set(userId, userBooks);
+    const userBooks = this.store.get(data.userId) ?? [];
+    if (!userBooks.some((book) => book.cover_i === data.cover_i)) {
+      userBooks.push(data);
+    }
+    this.store.set(data.userId, userBooks);
     return Promise.resolve();
   }
   removeBookFromShelf(data: {
@@ -15,14 +16,19 @@ export class InMemoryBooksRepository implements BooksRepository {
     const { userId, cover_i } = data;
     const userBooks = this.store.get(userId);
     if (userBooks) {
-      userBooks.delete(cover_i);
-      if (userBooks.size === 0) {
+      const remainingBooks = userBooks.filter((book) => book.cover_i !== cover_i);
+      if (remainingBooks.length === 0) {
         this.store.delete(userId);
       } else {
-        this.store.set(userId, userBooks);
+        this.store.set(userId, remainingBooks);
       }
     }
     return Promise.resolve();
   }
-  private store = new Map<string, Set<number>>();
+
+  showBooksFromShelf(data: { userId: string }): Promise<addBookToShelf[]> {
+    return Promise.resolve(this.store.get(data.userId) ?? []);
+  }
+
+  private store = new Map<string, addBookToShelf[]>();
 }

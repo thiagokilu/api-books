@@ -62,4 +62,30 @@ export class DrizzleBooksRepository implements BooksRepository {
         ),
       );
   }
+
+  async showBooksFromShelf(data: {
+    userId: string;
+  }): Promise<addBookToShelf[]> {
+    const userBooks = await db.query.userLibraryTable.findMany({
+      where: { userId: data.userId },
+      with: {
+        book: true,
+      },
+    });
+
+    if (!userBooks) {
+      return [];
+    }
+
+    return userBooks
+      .filter((userBook) => userBook.book)
+      .map((userBook) => ({
+        userId: data.userId,
+        title: userBook.book!.title,
+        author_name: userBook.book!.author
+          ? userBook.book!.author.split(", ")
+          : [],
+        cover_i: Number.parseInt(userBook.book!.externalId, 10),
+      }));
+  }
 }
