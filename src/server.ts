@@ -24,6 +24,7 @@ import { editUserProfileRoute } from "./infra/http/routes/edit-user-profile-rout
 import { requestVerificationEmailRoute } from "./infra/http/routes/request-verification-email-route";
 import { verifyEmailRoute } from "./infra/http/routes/verify-email-route";
 import { removeBookShelfRoute } from "./infra/http/routes/remove-book-shelf-route";
+import { showBookShelfRoute } from "./infra/http/routes/show-book-shelf-route";
 
 const app = fastify();
 
@@ -84,6 +85,7 @@ typedApp.register(editUserProfileRoute);
 typedApp.register(requestVerificationEmailRoute);
 typedApp.register(verifyEmailRoute);
 typedApp.register(removeBookShelfRoute);
+typedApp.register(showBookShelfRoute);
 
 const start = async () => {
   try {
