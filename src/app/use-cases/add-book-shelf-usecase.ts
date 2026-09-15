@@ -2,14 +2,6 @@ import type { BooksRepository } from "../repositories/books-repository";
 import type { UsersRepository } from "../repositories/users-repository";
 
 interface IBookShelfRequest {
-  // "docs": [
-  // {
-  //     "title": "Clean Code",
-  //     "author_name": [
-  //         "Robert C. Martin"
-  //     ],
-  //     "cover_i": 8065615
-  // },
   userId: string;
   title: string;
   author_name: string[];
