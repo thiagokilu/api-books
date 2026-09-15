@@ -7,4 +7,5 @@ export interface addBookToShelf {
 
 export interface BooksRepository {
   addBookToShelf(data: addBookToShelf): Promise<void>;
+  removeBookFromShelf(data: { userId: string; cover_i: number }): Promise<void>;
 }
