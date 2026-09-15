@@ -6,8 +6,10 @@ import { isAuth } from "./isAuth";
 import type { FastifyRequest } from "fastify";
 import { UnauthorizedError } from "../../../app/erros/unauthorizedError-error";
 import jwt from "jsonwebtoken";
+import { InMemoryTokensRepository } from "../../../app/repositories/in-memory/in-memory-tokens-repository";
 
 let usersRepository: InMemoryUsersRepository;
+let tokensRepository: InMemoryTokensRepository;
 
 function makeRequest(authHeader?: string): FastifyRequest {
   return {
@@ -20,6 +22,7 @@ function makeRequest(authHeader?: string): FastifyRequest {
 describe("isAuth", () => {
   beforeEach(() => {
     usersRepository = new InMemoryUsersRepository();
+    tokensRepository = new InMemoryTokensRepository();
   });
 
   it("should be able to access protected route", async () => {
@@ -40,6 +43,7 @@ describe("isAuth", () => {
         password: "password123",
       },
       usersRepository,
+      tokensRepository,
     );
 
     const request = makeRequest(`Bearer ${accessToken}`);

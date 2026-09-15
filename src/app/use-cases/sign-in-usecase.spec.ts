@@ -5,12 +5,15 @@ import { signInUseCase } from "./sign-in-usecase";
 import { verify } from "jsonwebtoken";
 import "dotenv/config";
 import { InvalidCredentialsError } from "../erros/invalid-credentials-error";
+import { InMemoryTokensRepository } from "../repositories/in-memory/in-memory-tokens-repository";
 
 let usersRepository: InMemoryUsersRepository;
+let tokensRepository: InMemoryTokensRepository;
 
 describe("SignInUseCase", () => {
   beforeEach(() => {
     usersRepository = new InMemoryUsersRepository();
+    tokensRepository = new InMemoryTokensRepository();
   });
 
   it("should be able to sign in with valid credentials", async () => {
@@ -31,6 +34,7 @@ describe("SignInUseCase", () => {
         password: "password123",
       },
       usersRepository, // ✅ Passado aqui
+      tokensRepository, // ✅ Passado aqui
     );
 
     expect(result).toEqual({
@@ -63,6 +67,7 @@ describe("SignInUseCase", () => {
           password: "wrongpassword",
         },
         usersRepository, // ✅ Passado aqui
+        tokensRepository, // ✅ Passado aqui
       ),
     ).rejects.toThrow(InvalidCredentialsError);
   });

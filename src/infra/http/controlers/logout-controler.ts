@@ -1,4 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
+import { RedisTokensRepository } from "../../../app/repositories/redis/redis-token-repository";
 import { LogoutUseCase } from "../../../app/use-cases/logout-usecase";
 
 export async function logoutController(
@@ -6,8 +7,9 @@ export async function logoutController(
   reply: FastifyReply,
 ) {
   const userId = request.userId;
+  const tokensRepository = new RedisTokensRepository();
 
-  await LogoutUseCase({ userId });
+  await LogoutUseCase({ userId }, tokensRepository);
 
   return reply
     .clearCookie("refreshToken")
