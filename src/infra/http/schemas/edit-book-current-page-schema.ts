@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const editBookReadingPageSchema = z.object({
-  userId: z.uuid(),
   cover_i: z.number(),
   currentPage: z.number().int().nonnegative(),
 });

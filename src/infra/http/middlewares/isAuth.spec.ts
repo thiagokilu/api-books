@@ -26,7 +26,7 @@ describe("isAuth", () => {
   });
 
   it("should be able to access protected route", async () => {
-    await signUpUseCase(
+    const user = await signUpUseCase(
       {
         name: "John Doe",
         username: "johndoe",
@@ -36,6 +36,8 @@ describe("isAuth", () => {
       },
       usersRepository,
     );
+
+    await usersRepository.markEmailAsVerified(user.id);
 
     const { accessToken } = await signInUseCase(
       {
@@ -48,7 +50,7 @@ describe("isAuth", () => {
 
     const request = makeRequest(`Bearer ${accessToken}`);
 
-    await isAuth(request);
+    await isAuth(request, usersRepository);
 
     expect(request.userId).toBeDefined();
   });
@@ -56,19 +58,25 @@ describe("isAuth", () => {
   it("should not be able to access protected route without token", async () => {
     const request = makeRequest();
 
-    await expect(isAuth(request)).rejects.toThrow(UnauthorizedError);
+    await expect(isAuth(request, usersRepository)).rejects.toThrow(
+      UnauthorizedError,
+    );
   });
 
   it("should not be able to access protected route with invalid token", async () => {
     const request = makeRequest(`Bearer invalid-token`);
 
-    await expect(isAuth(request)).rejects.toThrow(UnauthorizedError);
+    await expect(isAuth(request, usersRepository)).rejects.toThrow(
+      UnauthorizedError,
+    );
   });
 
   it("should not be able to access protected route with expired token", async () => {
     const fakeToken = jwt.sign({}, "outro-secret", { subject: "user-1" });
     const request = makeRequest(`Bearer ${fakeToken}`);
 
-    await expect(isAuth(request)).rejects.toThrow(UnauthorizedError);
+    await expect(isAuth(request, usersRepository)).rejects.toThrow(
+      UnauthorizedError,
+    );
   });
 });
