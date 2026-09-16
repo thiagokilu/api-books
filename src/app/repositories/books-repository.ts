@@ -4,6 +4,7 @@ export interface addBookToShelf {
   author_name: string[];
   cover_i: number;
   status?: "WANT_TO_READ" | "READING" | "COMPLETED";
+  currentPage?: number;
 }
 
 export interface BooksRepository {
@@ -14,5 +15,10 @@ export interface BooksRepository {
     userId: string;
     cover_i: number;
     readingStatus: "WANT_TO_READ" | "READING" | "COMPLETED";
+  }): Promise<void>;
+  editBookCurrentPage(data: {
+    userId: string;
+    cover_i: number;
+    currentPage: number;
   }): Promise<void>;
 }
