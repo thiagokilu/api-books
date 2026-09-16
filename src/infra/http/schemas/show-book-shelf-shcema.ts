@@ -10,6 +10,7 @@ export const showBookShelfSuccessResponseSchema = z.object({
       title: z.string(),
       author_name: z.array(z.string()),
       cover_i: z.number().int().nonnegative(),
+      status: z.enum(["WANT_TO_READ", "READING", "COMPLETED"]),
     }),
   ),
 });

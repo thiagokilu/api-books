@@ -86,6 +86,34 @@ export class DrizzleBooksRepository implements BooksRepository {
           ? userBook.book!.author.split(", ")
           : [],
         cover_i: Number.parseInt(userBook.book!.externalId, 10),
+        status: userBook.status as "WANT_TO_READ" | "READING" | "COMPLETED",
       }));
+  }
+
+  async editReadingStatus(data: {
+    userId: string;
+    cover_i: number;
+    readingStatus: string;
+  }): Promise<void> {
+    const externalId = String(data.cover_i);
+
+    const book = await db.query.booksTable.findFirst({
+      where: { externalId },
+      columns: { id: true },
+    });
+
+    if (!book) {
+      throw new Error("Book not found");
+    }
+
+    await db
+      .update(userLibraryTable)
+      .set({ status: data.readingStatus })
+      .where(
+        and(
+          eq(userLibraryTable.userId, data.userId),
+          eq(userLibraryTable.bookId, book.id),
+        ),
+      );
   }
 }
