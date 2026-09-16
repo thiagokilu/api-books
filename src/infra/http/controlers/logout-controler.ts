@@ -13,6 +13,7 @@ export async function logoutController(
 
   return reply
     .clearCookie("refreshToken")
+    .clearCookie("accessToken")
     .status(200)
     .send({ message: "Logout realizado com sucesso" });
 }
