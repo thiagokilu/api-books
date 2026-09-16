@@ -4,7 +4,11 @@ export class InMemoryBooksRepository implements BooksRepository {
   addBookToShelf(data: addBookToShelf): Promise<void> {
     const userBooks = this.store.get(data.userId) ?? [];
     if (!userBooks.some((book) => book.cover_i === data.cover_i)) {
-      userBooks.push({ ...data, status: data.status ?? "WANT_TO_READ" });
+      userBooks.push({
+        ...data,
+        status: data.status ?? "WANT_TO_READ",
+        currentPage: data.currentPage ?? 0,
+      });
     }
     this.store.set(data.userId, userBooks);
     return Promise.resolve();
@@ -46,6 +50,27 @@ export class InMemoryBooksRepository implements BooksRepository {
         const book = userBooks[bookIndex];
         if (book) {
           book.status = readingStatus;
+          this.store.set(userId, userBooks);
+        }
+      }
+    }
+    return Promise.resolve();
+  }
+
+  async editBookCurrentPage(data: {
+    userId: string;
+    cover_i: number;
+    currentPage: number;
+  }): Promise<void> {
+    const { userId, cover_i, currentPage } = data;
+    const userBooks = this.store.get(userId);
+
+    if (userBooks) {
+      const bookIndex = userBooks.findIndex((book) => book.cover_i === cover_i);
+      if (bookIndex !== -1) {
+        const book = userBooks[bookIndex];
+        if (book) {
+          book.currentPage = currentPage;
           this.store.set(userId, userBooks);
         }
       }

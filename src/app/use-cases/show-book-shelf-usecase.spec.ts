@@ -17,6 +17,7 @@ describe("showBookShelfUseCase", () => {
       author_name: ["Robert C. Martin"],
       cover_i: 8065615,
       status: "WANT_TO_READ" as const,
+      currentPage: 0,
     };
 
     await booksRepository.addBookToShelf(book);
@@ -34,6 +35,8 @@ describe("showBookShelfUseCase", () => {
       title: "Clean Code",
       author_name: ["Robert C. Martin"],
       cover_i: 8065615,
+      status: "WANT_TO_READ" as const,
+      currentPage: 0,
     });
 
     const result = await showBookShelfUseCase(booksRepository, "user-2");

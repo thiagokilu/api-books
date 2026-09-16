@@ -87,6 +87,7 @@ export class DrizzleBooksRepository implements BooksRepository {
           : [],
         cover_i: Number.parseInt(userBook.book!.externalId, 10),
         status: userBook.status as "WANT_TO_READ" | "READING" | "COMPLETED",
+        currentPage: userBook.currentPage,
       }));
   }
 
@@ -109,6 +110,33 @@ export class DrizzleBooksRepository implements BooksRepository {
     await db
       .update(userLibraryTable)
       .set({ status: data.readingStatus })
+      .where(
+        and(
+          eq(userLibraryTable.userId, data.userId),
+          eq(userLibraryTable.bookId, book.id),
+        ),
+      );
+  }
+
+  async editBookCurrentPage(data: {
+    userId: string;
+    cover_i: number;
+    currentPage: number;
+  }): Promise<void> {
+    const externalId = String(data.cover_i);
+
+    const book = await db.query.booksTable.findFirst({
+      where: { externalId },
+      columns: { id: true },
+    });
+
+    if (!book) {
+      throw new Error("Book not found");
+    }
+
+    await db
+      .update(userLibraryTable)
+      .set({ currentPage: data.currentPage })
       .where(
         and(
           eq(userLibraryTable.userId, data.userId),

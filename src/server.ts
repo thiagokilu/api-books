@@ -26,6 +26,7 @@ import { verifyEmailRoute } from "./infra/http/routes/verify-email-route";
 import { removeBookShelfRoute } from "./infra/http/routes/remove-book-shelf-route";
 import { showBookShelfRoute } from "./infra/http/routes/show-book-shelf-route";
 import { editBookReadingStatusRoute } from "./infra/http/routes/edit-book-reading-status-route";
+import { editBookReadingPageRoute } from "./infra/http/routes/edit-book-current-page-route";
 
 const app = fastify();
 
@@ -88,6 +89,7 @@ typedApp.register(verifyEmailRoute);
 typedApp.register(removeBookShelfRoute);
 typedApp.register(showBookShelfRoute);
 typedApp.register(editBookReadingStatusRoute);
+typedApp.register(editBookReadingPageRoute);
 
 const start = async () => {
   try {

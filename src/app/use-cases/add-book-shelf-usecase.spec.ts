@@ -35,7 +35,9 @@ describe("addBookToShelfUseCase", () => {
     expect(result).toEqual(book);
     await expect(
       booksRepository.showBooksFromShelf({ userId: user.id }),
-    ).resolves.toEqual([{ ...book, status: "WANT_TO_READ" }]);
+    ).resolves.toEqual([
+      { ...book, status: "WANT_TO_READ", currentPage: 0 },
+    ]);
   });
 
   it("should not be able to add a book for a non-existent user", async () => {
