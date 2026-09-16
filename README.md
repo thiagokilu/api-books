@@ -71,9 +71,9 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 
 - [x] Pesquisar livros por título ou autor
 - [x] Adicionar livros à estante
-- [ ] Remover livros da estante
-- [ ] Alterar status de leitura
-- [ ] Atualizar progresso de leitura
+- [x] Remover livros da estante
+- [x] Alterar status de leitura
+- [x] Atualizar progresso de leitura
 - [ ] Calcular automaticamente o percentual de leitura
 - [ ] Exibir resumo da estante no dashboard
 
@@ -95,9 +95,9 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 | RF06 | O usuário deve conseguir redefinir sua senha através do link recebido. |   x    |
 | RF07 | O usuário deve conseguir pesquisar livros por título ou autor.         |   x    |
 | RF08 | O usuário deve conseguir adicionar um livro à sua estante.             |   x    |
-| RF09 | O usuário deve conseguir remover um livro da sua estante.              |   ⬜   |
-| RF10 | O usuário deve conseguir alterar o status de leitura.                  |   ⬜   |
-| RF11 | O usuário deve conseguir atualizar seu progresso de leitura.           |   ⬜   |
+| RF09 | O usuário deve conseguir remover um livro da sua estante.              |   x    |
+| RF10 | O usuário deve conseguir alterar o status de leitura.                  |   x    |
+| RF11 | O usuário deve conseguir atualizar seu progresso de leitura.           |   x    |
 | RF12 | O sistema deve calcular automaticamente o percentual de leitura.       |   ⬜   |
 | RF13 | O sistema deve exibir um resumo da estante no dashboard.               |   ⬜   |
 | RF14 | O usuário deve conseguir editar seus dados de perfil.                  |   x    |
