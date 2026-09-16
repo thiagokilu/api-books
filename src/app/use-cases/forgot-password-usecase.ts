@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { createHash } from "crypto";
 import "dotenv/config";
 
 import type { UsersRepository } from "../repositories/users-repository.js";
@@ -14,7 +15,9 @@ export async function forgotPasswordUseCase(
   usersRepository: UsersRepository,
   passwordResetTokensRepository: PasswordResetTokensRepository,
 ) {
-  const resetToken = await passwordResetTokensRepository.findByToken(token);
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  const resetToken =
+    await passwordResetTokensRepository.findByToken(tokenHash);
 
   if (!resetToken || resetToken.expiresAt < new Date()) {
     throw new Error("Invalid or expired token");

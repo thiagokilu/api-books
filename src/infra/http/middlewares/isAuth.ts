@@ -22,9 +22,7 @@ export async function isAuth(
   dependency: FastifyReply | UsersRepository,
 ) {
   const usersRepository =
-    "findById" in dependency
-      ? dependency
-      : new DrizzleUsersRepository();
+    "findById" in dependency ? dependency : new DrizzleUsersRepository();
   const authHeader = request.headers.authorization;
   const tokenFromCookie = request.cookies?.accessToken;
 

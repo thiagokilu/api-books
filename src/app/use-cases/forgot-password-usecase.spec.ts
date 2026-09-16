@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import bcrypt from "bcrypt";
+import { createHash } from "crypto";
 import "dotenv/config";
 import { InMemoryUsersRepository } from "../repositories/in-memory/in-memory-users-repository";
 import { InMemoryPasswordResetTokensRepository } from "../repositories/in-memory/in-memory-password-reset-tokens-repository";
@@ -23,15 +24,18 @@ describe("ForgotPasswordUseCase", () => {
       bio: "Bio here",
     });
 
+    const rawToken = "token-de-teste";
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
     const resetToken = await passwordResetTokensRepository.create({
       userId: user.id,
-      token: "valid-token-123",
+      token: tokenHash,
       expiresAt: new Date(Date.now() + 1000 * 60 * 30), // 30 minutos no futuro
     });
 
     const response = await forgotPasswordUseCase(
       {
-        token: "valid-token-123",
+        token: rawToken,
         newPassword: "newpassword123",
       },
       usersRepository,
@@ -81,7 +85,9 @@ describe("ForgotPasswordUseCase", () => {
 
     await passwordResetTokensRepository.create({
       userId: user.id,
-      token: "expired-token-123",
+      token: createHash("sha256")
+        .update("expired-token-123")
+        .digest("hex"),
       expiresAt: new Date(Date.now() - 1000 * 60), // 1 minuto no passado
     });
 

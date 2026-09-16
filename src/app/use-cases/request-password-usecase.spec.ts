@@ -53,6 +53,9 @@ describe("RequestPasswordUseCase", () => {
     expect(createdToken!.token).toBeDefined();
     expect(createdToken!.expiresAt.getTime()).toBeGreaterThan(Date.now());
 
+    const emailPayload = mockSend.mock.calls[0]![0];
+    expect(emailPayload.html).not.toContain(createdToken!.token);
+
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         to: [user.email],
