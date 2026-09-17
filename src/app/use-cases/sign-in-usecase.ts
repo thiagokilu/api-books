@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { InvalidCredentialsError } from "../erros/invalid-credentials-error";
 import type { UsersRepository } from "../repositories/users-repository";
 import type { TokensRepository } from "../repositories/tokens-repository";
+import { env } from "../../infra/lib/env.js";
 
 export interface ISignInUseCaseRequest {
   email: string;
@@ -26,20 +27,20 @@ export async function signInUseCase(
     throw new InvalidCredentialsError();
   }
 
-  const isPasswordValid = bcrypt.compareSync(password, user.password);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
     throw new InvalidCredentialsError();
   }
 
   // Token para acessar as rotas protegidas
-  const accessToken = jwt.sign({}, process.env.JWT_SECRET!, {
+  const accessToken = jwt.sign({}, env.JWT_SECRET, {
     subject: user.id,
     expiresIn: "15m",
   });
 
   // Token para renovar o access token
-  const refreshToken = jwt.sign({}, process.env.JWT_REFRESH_SECRET!, {
+  const refreshToken = jwt.sign({}, env.JWT_REFRESH_SECRET, {
     subject: user.id,
     expiresIn: "30m",
   });
