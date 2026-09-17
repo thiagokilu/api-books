@@ -1,6 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { RedisTokensRepository } from "../../../app/repositories/redis/redis-token-repository";
 import { refreshTokenUseCase } from "../../../app/use-cases/refresh-token-usecase";
+import { env } from "../../lib/env.js";
 
 export async function refreshTokenController(
   request: FastifyRequest,
@@ -22,7 +23,7 @@ export async function refreshTokenController(
     // 2. Atualizar o cookie no navegador com o novo token:
     reply.setCookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 7,

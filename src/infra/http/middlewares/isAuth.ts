@@ -4,6 +4,7 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import { UnauthorizedError } from "../../../app/erros/unauthorizedError-error";
 import type { UsersRepository } from "../../../app/repositories/users-repository";
 import { DrizzleUsersRepository } from "../../../app/repositories/drizzle/drizzle-users-repository";
+import { env } from "../../lib/env.js";
 
 interface TokenPayload extends JwtPayload {
   sub: string;
@@ -37,8 +38,7 @@ export async function isAuth(
   let userId: string;
 
   try {
-    const JWT_SECRET = String(process.env.JWT_SECRET);
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as TokenPayload;
     userId = decoded.sub;
   } catch {
     throw new UnauthorizedError();

@@ -6,6 +6,7 @@ import { verify } from "jsonwebtoken";
 import "dotenv/config";
 import { InvalidCredentialsError } from "../erros/invalid-credentials-error";
 import { InMemoryTokensRepository } from "../repositories/in-memory/in-memory-tokens-repository";
+import { env } from "../../infra/lib/env.js";
 
 let usersRepository: InMemoryUsersRepository;
 let tokensRepository: InMemoryTokensRepository;
@@ -42,7 +43,7 @@ describe("SignInUseCase", () => {
       refreshToken: expect.any(String),
     });
 
-    const payload = verify(result.accessToken, String(process.env.JWT_SECRET));
+    const payload = verify(result.accessToken, env.JWT_SECRET);
     expect(payload).toMatchObject({
       sub: expect.any(String),
     });

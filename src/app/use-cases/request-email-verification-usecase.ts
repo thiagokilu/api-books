@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import type { UsersRepository } from "../repositories/users-repository";
 import { Resend } from "resend";
+import { env } from "../../infra/lib/env.js";
 
 const genericMessage = {
   message:
@@ -22,9 +23,9 @@ export async function requestEmailVerification(
 
   await usersRepository.saveVerificationToken(user.id, token, expiresAt);
 
-  const verifyUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
+  const verifyUrl = `${env.APP_URL}/verify-email?token=${token}`;
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = new Resend(env.RESEND_API_KEY);
   const { error } = await resend.emails.send({
     from: "Acme <onboarding@resend.dev>",
     to: [user.email],

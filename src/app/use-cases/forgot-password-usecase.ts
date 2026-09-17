@@ -4,6 +4,7 @@ import "dotenv/config";
 
 import type { UsersRepository } from "../repositories/users-repository.js";
 import type { PasswordResetTokensRepository } from "../repositories/password-reset-tokens-repository.js";
+import { env } from "../../infra/lib/env.js";
 
 export interface ResetPasswordUseCaseRequest {
   token: string;
@@ -16,17 +17,13 @@ export async function forgotPasswordUseCase(
   passwordResetTokensRepository: PasswordResetTokensRepository,
 ) {
   const tokenHash = createHash("sha256").update(token).digest("hex");
-  const resetToken =
-    await passwordResetTokensRepository.findByToken(tokenHash);
+  const resetToken = await passwordResetTokensRepository.findByToken(tokenHash);
 
   if (!resetToken || resetToken.expiresAt < new Date()) {
     throw new Error("Invalid or expired token");
   }
 
-  const hashedPassword = await bcrypt.hash(
-    newPassword,
-    process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10,
-  );
+  const hashedPassword = await bcrypt.hash(newPassword, env.SALT_ROUNDS);
 
   await usersRepository.updatePassword(resetToken.userId, hashedPassword);
 
