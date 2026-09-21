@@ -46,7 +46,7 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
       SALT_ROUNDS: 10
-      REDIS_URL: "redis://localhost:6378"
+      REDIS_URL: "redis://localhost:6379"
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       APP_URL: "http://localhost:8080"
 

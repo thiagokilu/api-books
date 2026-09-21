@@ -11,6 +11,12 @@ export function removeBookShelfRoute(app: FastifyInstance) {
     "/remove-book-shelf",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 30,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "remove a book from the user's bookshelf",
         tags: ["Bookshelf"],

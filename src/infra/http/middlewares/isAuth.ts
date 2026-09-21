@@ -46,7 +46,14 @@ export async function isAuth(
 
   const user = await usersRepository.findById(userId);
 
-  if (!user || !user.emailVerified) {
+  if (!user) {
+    throw new UnauthorizedError("Usuário não encontrado");
+  }
+
+  const isVerificationEmailRoute =
+    request.url?.includes("/request-verification-email");
+
+  if (!user.emailVerified && !isVerificationEmailRoute) {
     throw new UnauthorizedError("E-mail não verificado");
   }
 

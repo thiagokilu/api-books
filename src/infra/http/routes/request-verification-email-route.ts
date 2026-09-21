@@ -11,6 +11,12 @@ export function requestVerificationEmailRoute(app: FastifyInstance) {
     "/request-verification-email",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 3,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "Request email verification",
         tags: ["Auth"],
