@@ -10,6 +10,12 @@ export function searchBooksRoute(app: FastifyInstance) {
   app.get(
     "/books/search",
     {
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         querystring: searchBooksSchema,
         summary: "Search books",

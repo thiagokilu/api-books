@@ -9,6 +9,12 @@ export function refreshTokenRoute(app: FastifyInstance) {
   app.post(
     "/refresh-token",
     {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         tags: ["Auth"],
         summary: "Refresh access token using refresh token",

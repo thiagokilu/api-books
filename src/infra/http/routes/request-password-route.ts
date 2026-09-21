@@ -10,6 +10,12 @@ export function requestPasswordRoute(app: FastifyInstance) {
   app.post(
     "/request-password",
     {
+      config: {
+        rateLimit: {
+          max: 3,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         body: requestPasswordSchema,
         summary: "Forgot password",

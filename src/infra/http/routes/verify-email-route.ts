@@ -10,6 +10,12 @@ export function verifyEmailRoute(app: FastifyInstance) {
   app.post(
     "/verify-email",
     {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "Verify user email",
         tags: ["Auth"],

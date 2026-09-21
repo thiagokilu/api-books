@@ -11,6 +11,12 @@ export function logoutRoute(app: FastifyInstance) {
     "/logout",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "Sign out of the current session",
         tags: ["Auth"],

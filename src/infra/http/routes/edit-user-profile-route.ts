@@ -12,6 +12,12 @@ export function editUserProfileRoute(app: FastifyInstance) {
     "/edit",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "Edit user profile",
         tags: ["User"],

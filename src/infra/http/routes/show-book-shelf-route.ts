@@ -10,6 +10,12 @@ export function showBookShelfRoute(app: FastifyInstance) {
   app.get(
     "/show-book-shelf/:userId",
     {
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "Show a user's bookshelf",
         tags: ["Bookshelf"],

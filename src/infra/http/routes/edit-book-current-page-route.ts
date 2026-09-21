@@ -11,6 +11,12 @@ export function editBookReadingPageRoute(app: FastifyInstance) {
     "/edit-book-reading-page",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "add a book to the user's bookshelf",
         tags: ["Bookshelf"],

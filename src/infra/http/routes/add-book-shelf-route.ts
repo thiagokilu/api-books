@@ -11,6 +11,12 @@ export function addBookShelfRoute(app: FastifyInstance) {
     "/add-book-shelf",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 30,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "add a book to the user's bookshelf",
         tags: ["Bookshelf"],

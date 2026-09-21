@@ -11,6 +11,12 @@ export function editBookReadingStatusRoute(app: FastifyInstance) {
     "/edit-book-reading-status",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 30,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "edit a book reading status in the user's bookshelf",
         tags: ["Bookshelf"],
