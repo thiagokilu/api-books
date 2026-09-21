@@ -2,6 +2,7 @@ import "temporal-polyfill/full/global";
 import fastify from "fastify";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
+import fastifyRateLimit from "@fastify/rate-limit";
 import Swagger from "@fastify/swagger";
 import SwaggerUI from "@fastify/swagger-ui";
 import {
@@ -10,6 +11,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { rateLimitRedis } from "./infra/lib/rateLimit";
 
 import { signUpRoute } from "./infra/http/routes/sign-up-route";
 import { signInRoute } from "./infra/http/routes/sign-in-route";
@@ -23,14 +25,25 @@ import { addBookShelfRoute } from "./infra/http/routes/add-book-shelf-route";
 import { editUserProfileRoute } from "./infra/http/routes/edit-user-profile-route";
 import { requestVerificationEmailRoute } from "./infra/http/routes/request-verification-email-route";
 import { verifyEmailRoute } from "./infra/http/routes/verify-email-route";
+import { removeBookShelfRoute } from "./infra/http/routes/remove-book-shelf-route";
+import { showBookShelfRoute } from "./infra/http/routes/show-book-shelf-route";
+import { editBookReadingStatusRoute } from "./infra/http/routes/edit-book-reading-status-route";
+import { editBookReadingPageRoute } from "./infra/http/routes/edit-book-current-page-route";
 
-const app = fastify();
+export const app = fastify();
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
 app.register(cors, {
   origin: "*",
+});
+
+app.register(fastifyRateLimit, {
+  redis: rateLimitRedis,
+  nameSpace: "api-books:rate-limit:",
+  max: 100,
+  timeWindow: 1000 * 60 * 60, // 1 hour
 });
 
 app.register(cookie);
@@ -82,6 +95,10 @@ typedApp.register(addBookShelfRoute);
 typedApp.register(editUserProfileRoute);
 typedApp.register(requestVerificationEmailRoute);
 typedApp.register(verifyEmailRoute);
+typedApp.register(removeBookShelfRoute);
+typedApp.register(showBookShelfRoute);
+typedApp.register(editBookReadingStatusRoute);
+typedApp.register(editBookReadingPageRoute);
 
 const start = async () => {
   try {
@@ -97,4 +114,6 @@ const start = async () => {
   }
 };
 
-start();
+if (process.env.NODE_ENV !== "test") {
+  start();
+}

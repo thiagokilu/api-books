@@ -2,6 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { makeSignInUseCase } from "../../../app/use-cases/factories/make-sign-in-usecase";
 import type { SignInBodySchema } from "../schemas/sign-in-schema";
 import { InvalidCredentialsError } from "../../../app/erros/invalid-credentials-error";
+import { env } from "../../lib/env.js";
 
 export async function signInController(
   request: FastifyRequest<{ Body: SignInBodySchema }>,
@@ -21,7 +22,7 @@ export async function signInController(
 
     reply.setCookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/", // Mude de "/refresh-token" para "/"
       maxAge: 60 * 60 * 24 * 7,
@@ -29,7 +30,7 @@ export async function signInController(
 
     reply.setCookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/", // Mude de "/refresh-token" para "/"
       maxAge: 60 * 60 * 24 * 7,

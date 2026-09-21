@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import "dotenv/config";
 import { UserAlreadyExistsError } from "../erros/user-already-exist-error.js";
 import type { UsersRepository } from "../repositories/users-repository.js";
+import { env } from "../../infra/lib/env.js";
 
 export interface ISignUpUseCaseRequest {
   name: string;
@@ -34,10 +35,7 @@ export async function signUpUseCase(
     throw new UserAlreadyExistsError();
   }
 
-  const hashedPassword = await bcrypt.hash(
-    password,
-    process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10,
-  );
+  const hashedPassword = await bcrypt.hash(password, env.SALT_ROUNDS);
 
   const user = await usersRepository.create({
     email,

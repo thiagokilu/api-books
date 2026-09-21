@@ -1,7 +1,8 @@
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import type { UsersRepository } from "../repositories/users-repository";
 import type { PasswordResetTokensRepository } from "../repositories/password-reset-tokens-repository";
 import { Resend } from "resend";
+import { env } from "../../infra/lib/env.js";
 
 export async function requestPasswordUseCase(
   { email }: { email: string },
@@ -18,17 +19,19 @@ export async function requestPasswordUseCase(
     };
   }
 
-  const token = randomBytes(32).toString("hex");
+  const rawToken = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 min
+
+  const tokenHash = createHash("sha256").update(rawToken).digest("hex");
 
   await passwordResetTokensRepository.create({
     userId: user.id,
-    token,
+    token: tokenHash,
     expiresAt,
   });
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  const resetLink = `${process.env.APP_URL}/index.html?token=${token}`;
+  const resend = new Resend(env.RESEND_API_KEY);
+  const resetLink = `${env.APP_URL}/index.html?token=${rawToken}`;
 
   const { error } = await resend.emails.send({
     from: "Acme <onboarding@resend.dev>",

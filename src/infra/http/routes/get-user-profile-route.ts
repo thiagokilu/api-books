@@ -11,6 +11,12 @@ export function getUserProfileRoute(app: FastifyInstance) {
     "/me",
     {
       preHandler: isAuth,
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: 1000 * 60,
+        },
+      },
       schema: {
         summary: "Profile data user",
         tags: ["User"],

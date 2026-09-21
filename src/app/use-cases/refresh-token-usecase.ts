@@ -1,23 +1,27 @@
 import jwt from "jsonwebtoken";
 import { InvalidCredentialsError } from "../erros/invalid-credentials-error";
-import { redis } from "../../infra/lib/redis";
+import type { TokensRepository } from "../repositories/tokens-repository";
+import { env } from "../../infra/lib/env.js";
 
 interface IRefreshTokenUseCaseRequest {
   refreshToken: string;
 }
 
-interface IRefreshTokenUseCaseResponse {
+export interface IRefreshTokenUseCaseResponse {
   accessToken: string;
   refreshToken: string;
 }
 
 export async function refreshTokenUseCase({
   refreshToken,
-}: IRefreshTokenUseCaseRequest): Promise<IRefreshTokenUseCaseResponse> {
+  tokensRepository,
+}: IRefreshTokenUseCaseRequest & {
+  tokensRepository: TokensRepository;
+}): Promise<IRefreshTokenUseCaseResponse> {
   try {
     const payload = jwt.verify(
       refreshToken,
-      process.env.JWT_REFRESH_SECRET!,
+      env.JWT_REFRESH_SECRET,
     ) as jwt.JwtPayload;
 
     const userId = payload.sub;
@@ -27,7 +31,7 @@ export async function refreshTokenUseCase({
     }
 
     // 2. Busca o refresh token armazenado no Redis
-    const storedRefreshToken = await redis.get(`refresh-token:${userId}`);
+    const storedRefreshToken = await tokensRepository.getRefreshToken(userId);
 
     // 3. Verifica se existe e se é o mesmo token
     if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
@@ -35,21 +39,19 @@ export async function refreshTokenUseCase({
     }
 
     // Gerar novo access token
-    const accessToken = jwt.sign({}, process.env.JWT_SECRET!, {
+    const accessToken = jwt.sign({}, env.JWT_SECRET, {
       subject: userId,
       expiresIn: "30m",
     });
 
     // Rotação: gerar novo refresh token
-    const newRefreshToken = jwt.sign({}, process.env.JWT_REFRESH_SECRET!, {
+    const newRefreshToken = jwt.sign({}, env.JWT_REFRESH_SECRET, {
       subject: userId,
       expiresIn: "30m",
     });
 
     // Atualizar no Redis
-    await redis.set(`refresh-token:${userId}`, newRefreshToken, {
-      EX: 60 * 30,
-    });
+    await tokensRepository.saveRefreshToken(userId, newRefreshToken);
 
     return { accessToken, refreshToken: newRefreshToken };
   } catch {

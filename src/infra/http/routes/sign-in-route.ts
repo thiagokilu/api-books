@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
+
 import { signInController } from "../controlers/sign-in-controler";
+
 import {
   signInSchema,
   signInSuccessResponseSchema,
@@ -10,6 +12,13 @@ export function signInRoute(app: FastifyInstance) {
   app.post(
     "/sign-in",
     {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: 1000 * 60, // 1 minuto
+        },
+      },
+
       schema: {
         body: signInSchema,
         summary: "Sign in with email and password",
