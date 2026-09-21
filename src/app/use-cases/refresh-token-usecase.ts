@@ -7,7 +7,7 @@ interface IRefreshTokenUseCaseRequest {
   refreshToken: string;
 }
 
-interface IRefreshTokenUseCaseResponse {
+export interface IRefreshTokenUseCaseResponse {
   accessToken: string;
   refreshToken: string;
 }
