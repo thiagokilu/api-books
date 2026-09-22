@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { addBookShelfController } from "../controlers/add-book-shelf-controler";
+import { addBookShelfController } from "../controllers/add-book-shelf-controler";
 import {
   addBookShelfSchema,
   addBookShelfSuccessResponseSchema,

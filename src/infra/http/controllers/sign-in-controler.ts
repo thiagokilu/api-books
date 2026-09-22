@@ -33,7 +33,7 @@ export async function signInController(
       secure: env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/", // Mude de "/refresh-token" para "/"
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 15, // 15 minutes - shorter than refresh token for security
     });
 
     return reply.status(200).send({

@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { editUserProfileController } from "../controlers/edit-user-profile-controler";
+import { editUserProfileController } from "../controllers/edit-user-profile-controler";
 import {
   editUserProfileSchema,
   editUserProfileSuccessResponseSchema,

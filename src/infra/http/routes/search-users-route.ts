@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import { searchUsersController } from "../controlers/search-users-controler";
+import { searchUsersController } from "../controllers/search-users-controler";
 import {
   searchUsersErrorResponseSchema,
   searchUsersSucessResponseSchema,

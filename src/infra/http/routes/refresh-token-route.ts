@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { refreshTokenController } from "../controlers/refresh-token-controller";
+import { refreshTokenController } from "../controllers/refresh-token-controller";
 import {
   refreshTokenSuccessResponseSchema,
   refreshTokenErrorResponseSchema,

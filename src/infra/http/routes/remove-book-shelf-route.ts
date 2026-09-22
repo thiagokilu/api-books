@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { removeBookShelfController } from "../controlers/remove-book-shelf-controler";
+import { removeBookShelfController } from "../controllers/remove-book-shelf-controler";
 import {
   removeBookShelfSchema,
   removeBookShelfSuccessResponseSchema,
