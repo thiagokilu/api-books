@@ -73,7 +73,7 @@ describe("showPublicBookShelfUseCase", () => {
   });
 
   it("should return empty books array when user has no books", async () => {
-    await usersRepository.create({
+     await usersRepository.create({
       name: "Ana",
       username: "ana",
       email: "ana@example.com",
