@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { verifyEmailController } from "../controlers/verify-email-controler";
+import { verifyEmailController } from "../controllers/verify-email-controler";
 import {
   verifyEmailSchema,
   verifyEmailSuccessResponseSchema,

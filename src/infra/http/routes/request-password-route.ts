@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { requestPasswordController } from "../controlers/request-password-controler";
+import { requestPasswordController } from "../controllers/request-password-controler";
 import {
   requestPasswordSuccessResponseSchema,
   requestPasswordErrorResponseSchema,

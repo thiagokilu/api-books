@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { forgotPasswordController } from "../controlers/forgot-password-controler";
+import { forgotPasswordController } from "../controllers/forgot-password-controler";
 import {
   forgotPasswordSuccessResponseSchema,
   forgotPasswordErrorResponseSchema,

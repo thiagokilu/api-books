@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { logoutController } from "../controlers/logout-controler";
+import { logoutController } from "../controllers/logout-controler";
 import {
   logoutSuccessResponseSchema,
   logoutErrorResponseSchema,

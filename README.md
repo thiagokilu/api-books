@@ -61,8 +61,10 @@ As rotas abaixo refletem a implementação atual. A referência completa de payl
 | POST | `/forgot-password` | Não | Iniciar recuperação de senha |
 | POST | `/request-password` | Não | Redefinir senha com token |
 | GET | `/books/search` | Não | Pesquisar livros por título ou autor |
+| GET | `/search-users/:username` | Sim | Buscar usuários por username |
 | POST | `/add-book-shelf` | Sim | Adicionar livro à estante |
-| GET | `/show-book-shelf/:userId` | Não | Consultar estante de um usuário |
+| GET | `/show-book-shelf` | Sim | Consultar estante do usuário logado |
+| GET | `/users/:username/reading` | Não | Consultar estante pública de um usuário |
 | POST | `/remove-book-shelf` | Sim | Remover livro da estante |
 | POST | `/edit-book-reading-status` | Sim | Alterar status de leitura |
 | POST | `/edit-book-reading-page` | Sim | Atualizar página atual |
@@ -165,6 +167,7 @@ As migrações versionadas ficam em `drizzle/`.
 - Rotas privadas protegidas por middleware de autenticação.
 - Validação de entrada e serialização com Zod.
 - Rate limiting global e limites específicos nas rotas sensíveis.
+- Access token com vida curta (15 minutos) e refresh token com vida longa (7 dias).
 
 ## Próximos passos
 

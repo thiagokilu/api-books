@@ -60,18 +60,6 @@ export const userLibraryTable = pgTable(
   (table) => [uniqueIndex("user_book_unique").on(table.userId, table.bookId)],
 );
 
-// TOKENS (confirmação de email / reset de senha)
-export const tokensTable = pgTable("tokens", {
-  id: uuid().primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  token: varchar({ length: 255 }).notNull().unique(),
-  type: varchar({ length: 50 }).notNull(), // EMAIL_CONFIRMATION | PASSWORD_RESET
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
 export const passwordResetTokensTable = pgTable("password_reset_tokens", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")

@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { getUserProfileController } from "../controlers/get-user-profile-controler";
+import { getUserProfileController } from "../controllers/get-user-profile-controler";
 import { isAuth } from "../middlewares/isAuth";
 import {
   getUserProfileSuccessResponseSchema,
