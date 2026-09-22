@@ -9,6 +9,9 @@ export default defineConfig({
           name: "unit",
           include: ["src/**/*.spec.ts"],
           exclude: ["src/**/*.e2e.spec.ts"],
+          env: {
+            NODE_ENV: "test",
+          },
         },
       },
       {
@@ -16,7 +19,9 @@ export default defineConfig({
         test: {
           name: "e2e",
           include: ["test/**/*.e2e.spec.ts"],
-          fileParallelism: false,
+          env: {
+            NODE_ENV: "test",
+          },
         },
       },
     ],

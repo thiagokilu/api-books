@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vitest";
+import { randomUUID } from "node:crypto";
 import { app } from "../src/server";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
 import { db } from "../src/index";
@@ -18,66 +19,92 @@ vi.mock("resend", () => {
     };
 });
 
-const TEST_EMAIL = "req_verif_e2e@email.com";
-const TEST_USERNAME = "req_verif_user";
-const PASSWORD = "password123";
-
 describe("Request Verification Email (E2E)", () => {
-    let unverifiedUserId: string;
-    let unverifiedAccessToken: string;
+  // dados únicos por execução do arquivo de teste
+  const runId = randomUUID().slice(0, 8);
+  const testEmail = `e2e-req-verif-${runId}@email.com`;
+  const testUsername = `e2e-req-verif-user-${runId}`;
+  const testPassword = "password123";
 
-    beforeAll(async () => {
-        await app.ready();
+  let unverifiedUserId: string;
+  let unverifiedAccessToken: string;
 
-        const usersRepository = new DrizzleUsersRepository();
+  beforeAll(async () => {
+    await app.ready();
 
-        const existingUser = await usersRepository.findByEmail(TEST_EMAIL);
-        if (existingUser) {
-            await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, existingUser.id));
-            await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
-        }
+    const usersRepository = new DrizzleUsersRepository();
 
-        // 1. Cadastra usuário não verificado
-        await app.inject({
-            method: "POST",
-            url: "/sign-up",
-            payload: {
-                name: "Unverified User",
-                username: TEST_USERNAME,
-                email: TEST_EMAIL,
-                password: PASSWORD,
-            },
-        });
+    const existingUser = await usersRepository.findByEmail(testEmail);
+    if (existingUser) {
+      await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, existingUser.id));
+      await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
+    }
 
-        const createdUser = await usersRepository.findByEmail(TEST_EMAIL);
-        if (createdUser) {
-            unverifiedUserId = createdUser.id;
-        }
-
-        // 2. Faz login para obter o access token
-        const signInResponse = await app.inject({
-            method: "POST",
-            url: "/sign-in",
-            payload: {
-                email: TEST_EMAIL,
-                password: PASSWORD,
-            },
-        });
-
-        unverifiedAccessToken = signInResponse.json().accessToken;
+    // 1. Cadastra usuário não verificado
+    const signUpResponse = await app.inject({
+      method: "POST",
+      url: "/sign-up",
+      payload: {
+        name: "Unverified User",
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      },
     });
 
-    beforeEach(async () => {
-        vi.clearAllMocks();
-        mockSend.mockResolvedValue({ error: null, data: { id: "email-id" } });
+    if (signUpResponse.statusCode !== 201) {
+      throw new Error(
+        `Sign-up falhou no setup do teste: ${signUpResponse.statusCode} - ${signUpResponse.body}`,
+      );
+    }
 
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
+    const createdUser = await usersRepository.findByEmail(testEmail);
+    if (!createdUser) {
+      throw new Error("Usuário não encontrado após sign-up");
+    }
+    unverifiedUserId = createdUser.id;
 
-        await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, unverifiedUserId));
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    // 2. Faz login para obter o access token
+    const signInResponse = await app.inject({
+      method: "POST",
+      url: "/sign-in",
+      payload: {
+        email: testEmail,
+        password: testPassword,
+      },
     });
+
+    if (signInResponse.statusCode !== 200) {
+      throw new Error(
+        `Sign-in falhou no setup do teste: ${signInResponse.statusCode} - ${signInResponse.body}`,
+      );
+    }
+
+    unverifiedAccessToken = signInResponse.json().accessToken;
+  });
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    mockSend.mockResolvedValue({ error: null, data: { id: "email-id" } });
+
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, unverifiedUserId));
+  });
 
     afterAll(async () => {
         await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, unverifiedUserId));
@@ -112,7 +139,7 @@ describe("Request Verification Email (E2E)", () => {
         // Verifica se o e-mail de verificação foi enviado
         expect(mockSend).toHaveBeenCalledWith(
             expect.objectContaining({
-                to: [TEST_EMAIL],
+                to: [testEmail],
                 subject: "Verify your email",
             }),
         );

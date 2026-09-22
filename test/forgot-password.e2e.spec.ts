@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { randomUUID } from "node:crypto";
 import { app } from "../src/server";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
 import { db } from "../src/index";
@@ -8,147 +9,154 @@ import { DrizzleUsersRepository } from "../src/app/repositories/drizzle/drizzle-
 import { createHash, randomBytes } from "crypto";
 import bcrypt from "bcrypt";
 
-const TEST_EMAIL = "forgot_pwd_e2e@email.com";
-const TEST_USERNAME = "forgot_pwd_user";
-const INITIAL_PASSWORD = "initialPassword123";
-
 describe("Forgot Password (E2E)", () => {
-    let userId: string;
+  // dados únicos por execução do arquivo de teste
+  const runId = randomUUID().slice(0, 8);
+  const testEmail = `e2e-forgot-pwd-${runId}@email.com`;
+  const testUsername = `e2e-forgot-pwd-user-${runId}`;
+  const initialPassword = "initialPassword123";
 
-    beforeAll(async () => {
-        await app.ready();
+  let userId: string;
 
-        const usersRepository = new DrizzleUsersRepository();
+  beforeAll(async () => {
+    await app.ready();
 
-        const existingUser = await usersRepository.findByEmail(TEST_EMAIL);
-        if (existingUser) {
-            await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, existingUser.id));
-            await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
-        }
+    const usersRepository = new DrizzleUsersRepository();
 
-        const hashedPassword = await bcrypt.hash(INITIAL_PASSWORD, 10);
+    const existingUser = await usersRepository.findByEmail(testEmail);
+    if (existingUser) {
+      await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, existingUser.id));
+      await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
+    }
 
-        const user = await usersRepository.create({
-            name: "Forgot Pwd User",
-            username: TEST_USERNAME,
-            email: TEST_EMAIL,
-            password: hashedPassword,
-        });
+    const hashedPassword = await bcrypt.hash(initialPassword, 10);
 
-        userId = user.id;
-        await usersRepository.markEmailAsVerified(user.id);
+    const user = await usersRepository.create({
+      name: "Forgot Pwd User",
+      username: testUsername,
+      email: testEmail,
+      password: hashedPassword,
     });
 
-    beforeEach(async () => {
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
+    userId = user.id;
+    await usersRepository.markEmailAsVerified(user.id);
+  });
 
-        await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
+  beforeEach(async () => {
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
+  });
+
+  afterAll(async () => {
+    await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
+    await db.delete(usersTable).where(eq(usersTable.id, userId));
+    await app.close();
+  });
+
+  it("should reset password with valid token and allow login with new password", async () => {
+    const rawToken = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
+    await db.insert(passwordResetTokensTable).values({
+      userId,
+      token: tokenHash,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 30), // 30 min
     });
 
-    afterAll(async () => {
-        await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
-        await db.delete(usersTable).where(eq(usersTable.id, userId));
-        await app.close();
+    const newPassword = "newPassword456";
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/forgot-password",
+      payload: {
+        token: rawToken,
+        newPassword,
+      },
     });
 
-    it("should reset password with valid token and allow login with new password", async () => {
-        const rawToken = randomBytes(32).toString("hex");
-        const tokenHash = createHash("sha256").update(rawToken).digest("hex");
-
-        await db.insert(passwordResetTokensTable).values({
-            userId,
-            token: tokenHash,
-            expiresAt: new Date(Date.now() + 1000 * 60 * 30), // 30 min
-        });
-
-        const newPassword = "newPassword456";
-
-        const response = await app.inject({
-            method: "POST",
-            url: "/forgot-password",
-            payload: {
-                token: rawToken,
-                newPassword,
-            },
-        });
-
-        expect(response.statusCode).toBe(200);
-        expect(response.json()).toEqual({
-            message: "Password updated successfully",
-        });
-
-        // Verifica se o token foi consumido (deletado do banco)
-        const tokensInDb = await db
-            .select()
-            .from(passwordResetTokensTable)
-            .where(eq(passwordResetTokensTable.token, tokenHash));
-        expect(tokensInDb).toHaveLength(0);
-
-        // Verifica que o login com a senha antiga falha
-        const oldLoginResponse = await app.inject({
-            method: "POST",
-            url: "/sign-in",
-            payload: {
-                email: TEST_EMAIL,
-                password: INITIAL_PASSWORD,
-            },
-        });
-        expect(oldLoginResponse.statusCode).toBe(400);
-
-        // Verifica que o login com a nova senha funciona
-        const newLoginResponse = await app.inject({
-            method: "POST",
-            url: "/sign-in",
-            payload: {
-                email: TEST_EMAIL,
-                password: newPassword,
-            },
-        });
-        expect(newLoginResponse.statusCode).toBe(200);
-        expect(newLoginResponse.json()).toHaveProperty("accessToken");
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      message: "Password updated successfully",
     });
 
-    it("should return 400 when attempting to reuse a consumed token", async () => {
-        const rawToken = randomBytes(32).toString("hex");
-        const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+    // Verifica se o token foi consumido (deletado do banco)
+    const tokensInDb = await db
+      .select()
+      .from(passwordResetTokensTable)
+      .where(eq(passwordResetTokensTable.token, tokenHash));
+    expect(tokensInDb).toHaveLength(0);
 
-        await db.insert(passwordResetTokensTable).values({
-            userId,
-            token: tokenHash,
-            expiresAt: new Date(Date.now() + 1000 * 60 * 30),
-        });
-
-        // Primeiro uso - sucesso
-        await app.inject({
-            method: "POST",
-            url: "/forgot-password",
-            payload: {
-                token: rawToken,
-                newPassword: "firstChange123",
-            },
-        });
-
-        // Limpa rate limit para a segunda chamada
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
-
-        // Segundo uso - deve falhar
-        const response = await app.inject({
-            method: "POST",
-            url: "/forgot-password",
-            payload: {
-                token: rawToken,
-                newPassword: "secondChange123",
-            },
-        });
-
-        expect(response.statusCode).toBe(400);
+    // Verifica que o login com a senha antiga falha
+    const oldLoginResponse = await app.inject({
+      method: "POST",
+      url: "/sign-in",
+      payload: {
+        email: testEmail,
+        password: initialPassword,
+      },
     });
+    expect(oldLoginResponse.statusCode).toBe(400);
+
+    // Verifica que o login com a nova senha funciona
+    const newLoginResponse = await app.inject({
+      method: "POST",
+      url: "/sign-in",
+      payload: {
+        email: testEmail,
+        password: newPassword,
+      },
+    });
+    expect(newLoginResponse.statusCode).toBe(200);
+    expect(newLoginResponse.json()).toHaveProperty("accessToken");
+  });
+
+  it("should return 400 when attempting to reuse a consumed token", async () => {
+    const rawToken = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
+    await db.insert(passwordResetTokensTable).values({
+      userId,
+      token: tokenHash,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 30),
+    });
+
+    // Primeiro uso - sucesso
+    await app.inject({
+      method: "POST",
+      url: "/forgot-password",
+      payload: {
+        token: rawToken,
+        newPassword: "firstChange123",
+      },
+    });
+
+    // Limpa rate limit para a segunda chamada
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    // Segundo uso - deve falhar
+    const response = await app.inject({
+      method: "POST",
+      url: "/forgot-password",
+      payload: {
+        token: rawToken,
+        newPassword: "secondChange123",
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+  });
 
     it("should return 400 with invalid token", async () => {
         const response = await app.inject({

@@ -143,4 +143,8 @@ export class DrizzleUsersRepository implements UsersRepository {
       .delete(verificationTokensTable)
       .where(eq(verificationTokensTable.id, id));
   }
+
+  async deleteById(id: string): Promise<void> {
+    await db.delete(usersTable).where(eq(usersTable.id, id));
+  }
 }

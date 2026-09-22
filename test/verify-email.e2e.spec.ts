@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { randomUUID } from "node:crypto";
 import { app } from "../src/server";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
 import { db } from "../src/index";
@@ -7,70 +8,94 @@ import { eq, or } from "drizzle-orm";
 import { DrizzleUsersRepository } from "../src/app/repositories/drizzle/drizzle-users-repository";
 import { randomBytes } from "crypto";
 
-const TEST_EMAIL = "verify_email_e2e@email.com";
-const TEST_USERNAME = "verify_email_user";
-const PASSWORD = "password123";
-
 describe("Verify Email (E2E)", () => {
-    let userId: string;
-    let accessToken: string;
+  // dados únicos por execução do arquivo de teste
+  const runId = randomUUID().slice(0, 8);
+  const testEmail = `e2e-verify-email-${runId}@email.com`;
+  const testUsername = `e2e-verify-email-user-${runId}`;
+  const testPassword = "password123";
 
-    beforeAll(async () => {
-        await app.ready();
+  let userId: string;
+  let accessToken: string;
 
-        const usersRepository = new DrizzleUsersRepository();
+  beforeAll(async () => {
+    await app.ready();
 
-        const existingUsers = await db
-            .select({ id: usersTable.id })
-            .from(usersTable)
-            .where(or(eq(usersTable.email, TEST_EMAIL), eq(usersTable.username, TEST_USERNAME)));
+    const usersRepository = new DrizzleUsersRepository();
 
-        for (const existingUser of existingUsers) {
-            await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, existingUser.id));
-            await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
-        }
+    const existingUsers = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(or(eq(usersTable.email, testEmail), eq(usersTable.username, testUsername)));
 
-        // 1. Cadastra usuário (emailVerified inicia como false)
-        const signUpResponse = await app.inject({
-            method: "POST",
-            url: "/sign-up",
-            payload: {
-                name: "Verify Email User",
-                username: TEST_USERNAME,
-                email: TEST_EMAIL,
-                password: PASSWORD,
-            },
-        });
-        expect(signUpResponse.statusCode).toBe(201);
+    for (const existingUser of existingUsers) {
+      await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, existingUser.id));
+      await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
+    }
 
-        const createdUser = await usersRepository.findByEmail(TEST_EMAIL);
-        if (!createdUser) {
-            throw new Error("The verification test user was not created");
-        }
-        userId = createdUser.id;
-
-        // 2. Faz login para obter o access token
-        const signInResponse = await app.inject({
-            method: "POST",
-            url: "/sign-in",
-            payload: {
-                email: TEST_EMAIL,
-                password: PASSWORD,
-            },
-        });
-
-        accessToken = signInResponse.json().accessToken;
+    // 1. Cadastra usuário (emailVerified inicia como false)
+    const signUpResponse = await app.inject({
+      method: "POST",
+      url: "/sign-up",
+      payload: {
+        name: "Verify Email User",
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      },
     });
 
-    beforeEach(async () => {
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
+    if (signUpResponse.statusCode !== 201) {
+      throw new Error(
+        `Sign-up falhou no setup do teste: ${signUpResponse.statusCode} - ${signUpResponse.body}`,
+      );
+    }
 
-        await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, userId));
-        await db.update(usersTable).set({ emailVerified: false }).where(eq(usersTable.id, userId));
+    const createdUser = await usersRepository.findByEmail(testEmail);
+    if (!createdUser) {
+      throw new Error("The verification test user was not created");
+    }
+    userId = createdUser.id;
+
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    // 2. Faz login para obter o access token
+    const signInResponse = await app.inject({
+      method: "POST",
+      url: "/sign-in",
+      payload: {
+        email: testEmail,
+        password: testPassword,
+      },
     });
+
+    if (signInResponse.statusCode !== 200) {
+      throw new Error(
+        `Sign-in falhou no setup do teste: ${signInResponse.statusCode} - ${signInResponse.body}`,
+      );
+    }
+
+    accessToken = signInResponse.json().accessToken;
+  });
+
+  beforeEach(async () => {
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, userId));
+    await db.update(usersTable).set({ emailVerified: false }).where(eq(usersTable.id, userId));
+  });
 
     afterAll(async () => {
         await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, userId));

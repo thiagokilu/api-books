@@ -1,110 +1,121 @@
-// src/app/use-cases/add-book-shelf-usecase.e2e.spec.ts
-
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { randomUUID } from "node:crypto";
 import { app } from "../src/server";
 import { DrizzleUsersRepository } from "../src/app/repositories/drizzle/drizzle-users-repository";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
 
 describe("Add Book to Shelf (E2E)", () => {
-    let accessToken: string;
+  // dados únicos por execução do arquivo de teste
+  const runId = randomUUID().slice(0, 8);
+  const testEmail = `e2etest-${runId}@email.com`;
+  const testUsername = `e2etestuser-${runId}`;
+  const testPassword = "senha123";
 
-    // 1. Sobe o servidor antes dos testes
-    beforeAll(async () => {
-        await app.ready();
+  let accessToken: string;
+  let userId: string;
 
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
+  beforeAll(async () => {
+    await app.ready();
 
-        const usersRepository = new DrizzleUsersRepository();
+    const usersRepository = new DrizzleUsersRepository();
 
-        // 2. Cria um usuário (ignora erro caso já exista)
-        await app.inject({
-            method: "POST",
-            url: "/sign-up",
-            payload: {
-                name: "Test User",
-                username: "e2etestuser",
-                email: "e2etest@email.com",
-                password: "senha123",
-            },
-        });
-
-        const user = await usersRepository.findByEmail("e2etest@email.com");
-        if (user) {
-            await usersRepository.markEmailAsVerified(user.id);
-        }
-
-        // 3. Faz login e captura o accessToken do body
-        const signInResponse = await app.inject({
-            method: "POST",
-            url: "/sign-in",
-            payload: {
-                email: "e2etest@email.com",
-                password: "senha123",
-            },
-        });
-
-        const body = signInResponse.json();
-        accessToken = body.accessToken;
+    const signUpResponse = await app.inject({
+      method: "POST",
+      url: "/sign-up",
+      payload: {
+        name: "Test User",
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      },
     });
 
-    // 4. Encerra o servidor após os testes
-    afterAll(async () => {
-        await app.close();
+    // falha rápido e com mensagem clara, em vez de deixar accessToken undefined
+    if (signUpResponse.statusCode !== 201) {
+      throw new Error(
+        `Sign-up falhou no setup do teste: ${signUpResponse.statusCode} - ${signUpResponse.body}`,
+      );
+    }
+
+    const user = await usersRepository.findByEmail(testEmail);
+    if (!user) throw new Error("Usuário não encontrado após sign-up");
+    userId = user.id;
+
+    await usersRepository.markEmailAsVerified(user.id);
+
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução,
+    // não o namespace inteiro
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    const signInResponse = await app.inject({
+      method: "POST",
+      url: "/sign-in",
+      payload: { email: testEmail, password: testPassword },
     });
 
-    // ✅ Cenário de sucesso
-    it("should add a book to shelf and return 201", async () => {
-        const response = await app.inject({
-            method: "POST",
-            url: "/add-book-shelf", // ✅ URL correta da rota
-            headers: {
-                authorization: `Bearer ${accessToken}`, // ✅ usando Bearer token
-            },
-            payload: {
-                title: "Clean Code",
-                author_name: ["Robert C. Martin"],
-                cover_i: 12345,
-            },
-        });
+    if (signInResponse.statusCode !== 200) {
+      throw new Error(
+        `Sign-in falhou no setup do teste: ${signInResponse.statusCode} - ${signInResponse.body}`,
+      );
+    }
 
-        expect(response.statusCode).toBe(201);
-        expect(response.json()).toEqual({
-            message: "Book added to shelf successfully",
-        });
+    accessToken = signInResponse.json().accessToken;
+  });
+
+  afterAll(async () => {
+    // limpa o que este teste criou, precisamente por userId
+    const usersRepository = new DrizzleUsersRepository();
+    if (userId) {
+      await usersRepository.deleteById(userId); // precisa existir/ter cascade nas shelf entries
+    }
+    await app.close();
+  });
+
+  it("should add a book to shelf and return 201", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/add-book-shelf",
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: {
+        title: `Clean Code ${runId}`, // evita colisão de unicidade entre runs
+        author_name: ["Robert C. Martin"],
+        cover_i: 12345,
+      },
     });
 
-    // ❌ Cenário sem autenticação
-    it("should return 401 when not authenticated", async () => {
-        const response = await app.inject({
-            method: "POST",
-            url: "/add-book-shelf", // ✅ URL correta da rota
-            payload: {
-                title: "Clean Code",
-                author_name: ["Robert C. Martin"],
-                cover_i: 12345,
-            },
-        });
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toEqual({
+      message: "Book added to shelf successfully",
+    });
+  });
 
-        expect(response.statusCode).toBe(401);
+  it("should return 401 when not authenticated", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/add-book-shelf",
+      payload: {
+        title: "Clean Code",
+        author_name: ["Robert C. Martin"],
+        cover_i: 12345,
+      },
     });
 
-    // ❌ Cenário com payload inválido
-    it("should return 400 when body is invalid", async () => {
-        const response = await app.inject({
-            method: "POST",
-            url: "/add-book-shelf", // ✅ URL correta da rota
-            headers: {
-                authorization: `Bearer ${accessToken}`, // ✅ usando Bearer token
-            },
-            payload: {
-                // "title" obrigatório não foi enviado
-                author_name: ["Robert C. Martin"],
-            },
-        });
+    expect(response.statusCode).toBe(401);
+  });
 
-        expect(response.statusCode).toBe(400);
+  it("should return 400 when body is invalid", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/add-book-shelf",
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { author_name: ["Robert C. Martin"] },
     });
+
+    expect(response.statusCode).toBe(400);
+  });
 });
