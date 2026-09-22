@@ -14,9 +14,8 @@ O núcleo da API está implementado e possui testes unitários e end-to-end. As 
 | Busca de livros | Implementado |
 | Estante: adicionar, listar, remover e atualizar leitura | Implementado |
 | Testes unitários e end-to-end | Implementados |
-| Cálculo automático de percentual de leitura | Pendente |
-| Dashboard, estatísticas e resumo da estante | Pendente |
-| CI/CD | Pendente |
+| Cálculo automático de percentual de leitura | Implementado |
+| CI/CD | Implementado |
 
 ## Tecnologias
 
@@ -169,9 +168,6 @@ As migrações versionadas ficam em `drizzle/`.
 
 ## Próximos passos
 
-- Calcular e expor o percentual de leitura a partir de `currentPage` e `totalPages`.
-- Criar dashboard com resumo e estatísticas da estante.
-- Adicionar pipeline de CI para lint, build e testes.
 - Revisar a autorização da rota pública de consulta de estante conforme a política de privacidade desejada.
 
 ## Autor

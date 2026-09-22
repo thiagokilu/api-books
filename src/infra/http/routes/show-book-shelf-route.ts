@@ -3,13 +3,14 @@ import type { FastifyInstance } from "fastify";
 import { showBookShelfController } from "../controlers/show-book-shelf-controler";
 import {
   showBookShelfErrorResponseSchema,
-  showBookShelfSchema,
   showBookShelfSuccessResponseSchema,
 } from "../schemas/show-book-shelf-shcema";
+import { isAuth } from "../middlewares/isAuth";
 export function showBookShelfRoute(app: FastifyInstance) {
   app.get(
-    "/show-book-shelf/:userId",
+    "/show-book-shelf",
     {
+      preHandler: isAuth,
       config: {
         rateLimit: {
           max: 60,
@@ -19,13 +20,12 @@ export function showBookShelfRoute(app: FastifyInstance) {
       schema: {
         summary: "Show a user's bookshelf",
         tags: ["Bookshelf"],
-        params: showBookShelfSchema,
         response: {
           200: showBookShelfSuccessResponseSchema,
           400: showBookShelfErrorResponseSchema,
         },
       },
-    },
+    }, 
     showBookShelfController,
   );
 }
