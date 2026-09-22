@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { editBookReadingPageController } from "../controlers/edit-book-current-page-controler";
+import { editBookReadingPageController } from "../controllers/edit-book-current-page-controler";
 import {
   editBookReadingPageSchema,
   editBookReadingPageSuccessResponseSchema,

@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { showPublicBookShelfController } from "../controlers/show-public-book-shelf-controller";
+import { showPublicBookShelfController } from "../controllers/show-public-book-shelf-controller";
 import {
   showPublicBookShelfNotFoundResponseSchema,
   showPublicBookShelfParamsSchema,

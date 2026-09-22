@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { searchBooksController } from "../controlers/search-books-controler";
+import { searchBooksController } from "../controllers/search-books-controler";
 import {
   searchBooksSchema,
   searchBooksSuccessResponseSchema,

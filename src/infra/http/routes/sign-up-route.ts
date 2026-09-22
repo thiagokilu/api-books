@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { signUpController } from "../controlers/sign-up-controler";
+import { signUpController } from "../controllers/sign-up-controler";
 import {
   signUpSchema,
   signUpSuccessResponseSchema,
