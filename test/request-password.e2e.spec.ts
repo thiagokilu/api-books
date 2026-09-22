@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vitest";
+import { randomUUID } from "node:crypto";
 import { app } from "../src/server";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
 import { db } from "../src/index";
@@ -18,45 +19,51 @@ vi.mock("resend", () => {
     };
 });
 
-const TEST_EMAIL = "request_pwd_e2e@email.com";
-const TEST_USERNAME = "request_pwd_user";
-
 describe("Request Password (E2E)", () => {
-    let userId: string;
+  // dados únicos por execução do arquivo de teste
+  const runId = randomUUID().slice(0, 8);
+  const testEmail = `e2e-request-pwd-${runId}@email.com`;
+  const testUsername = `e2e-request-pwd-user-${runId}`;
+  const testPassword = "hashedpassword123";
 
-    beforeAll(async () => {
-        await app.ready();
+  let userId: string;
 
-        const usersRepository = new DrizzleUsersRepository();
+  beforeAll(async () => {
+    await app.ready();
 
-        // Limpa resquícios se houver
-        const existingUser = await usersRepository.findByEmail(TEST_EMAIL);
-        if (existingUser) {
-            await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, existingUser.id));
-            await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
-        }
+    const usersRepository = new DrizzleUsersRepository();
 
-        const user = await usersRepository.create({
-            name: "Request Pwd User",
-            username: TEST_USERNAME,
-            email: TEST_EMAIL,
-            password: "hashedpassword123",
-        });
+    // Limpa resquícios se houver
+    const existingUser = await usersRepository.findByEmail(testEmail);
+    if (existingUser) {
+      await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, existingUser.id));
+      await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
+    }
 
-        userId = user.id;
+    const user = await usersRepository.create({
+      name: "Request Pwd User",
+      username: testUsername,
+      email: testEmail,
+      password: testPassword,
     });
 
-    beforeEach(async () => {
-        vi.clearAllMocks();
-        mockSend.mockResolvedValue({ error: null, data: { id: "email-id" } });
+    userId = user.id;
+  });
 
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    mockSend.mockResolvedValue({ error: null, data: { id: "email-id" } });
 
-        await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
-    });
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
+  });
 
     afterAll(async () => {
         await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.userId, userId));
@@ -64,38 +71,38 @@ describe("Request Password (E2E)", () => {
         await app.close();
     });
 
-    it("should request password reset for existing user and return 200", async () => {
-        const response = await app.inject({
-            method: "POST",
-            url: "/request-password",
-            payload: {
-                email: TEST_EMAIL,
-            },
-        });
-
-        expect(response.statusCode).toBe(200);
-        expect(response.json()).toEqual({
-            message: "If an account exists for this email, you will receive reset instructions.",
-        });
-
-        // Verifica se o token foi gravado no banco de dados
-        const tokens = await db
-            .select()
-            .from(passwordResetTokensTable)
-            .where(eq(passwordResetTokensTable.userId, userId));
-
-        expect(tokens).toHaveLength(1);
-        expect(tokens[0].token).toBeDefined();
-        expect(new Date(tokens[0].expiresAt).getTime()).toBeGreaterThan(Date.now());
-
-        // Verifica se o e-mail foi disparado com o link contendo o token
-        expect(mockSend).toHaveBeenCalledWith(
-            expect.objectContaining({
-                to: [TEST_EMAIL],
-                subject: "Redefinição de senha",
-            }),
-        );
+  it("should request password reset for existing user and return 200", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/request-password",
+      payload: {
+        email: testEmail,
+      },
     });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      message: "If an account exists for this email, you will receive reset instructions.",
+    });
+
+    // Verifica se o token foi gravado no banco de dados
+    const tokens = await db
+      .select()
+      .from(passwordResetTokensTable)
+      .where(eq(passwordResetTokensTable.userId, userId));
+
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0].token).toBeDefined();
+    expect(new Date(tokens[0].expiresAt).getTime()).toBeGreaterThan(Date.now());
+
+    // Verifica se o e-mail foi disparado com o link contendo o token
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: [testEmail],
+        subject: "Redefinição de senha",
+      }),
+    );
+  });
 
     it("should return 200 with generic message if user is not found without saving token or sending email", async () => {
         const response = await app.inject({

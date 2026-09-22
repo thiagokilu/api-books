@@ -39,12 +39,15 @@ app.register(cors, {
   origin: "*",
 });
 
-app.register(fastifyRateLimit, {
-  redis: rateLimitRedis,
-  nameSpace: "api-books:rate-limit:",
-  max: 100,
-  timeWindow: 1000 * 60 * 60, // 1 hour
-});
+// Only register rate limiting in non-test environments
+if (process.env.NODE_ENV !== "test") {
+  app.register(fastifyRateLimit, {
+    redis: rateLimitRedis,
+    nameSpace: "api-books:rate-limit:",
+    max: 100,
+    timeWindow: 1000 * 60 * 60, // 1 hour
+  });
+}
 
 app.register(cookie);
 
