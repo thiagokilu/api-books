@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { randomUUID } from "node:crypto";
 import { app } from "../src/server";
 import { DrizzleUsersRepository } from "../src/app/repositories/drizzle/drizzle-users-repository";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
@@ -6,91 +7,120 @@ import { db } from "../src/index";
 import { usersTable, booksTable } from "../src/infra/db/schema";
 import { eq } from "drizzle-orm";
 
-const TEST_EMAIL = "e2e_shelf_ops@email.com";
-const TEST_USERNAME = "e2e_shelf_ops_user";
-const TEST_COVER_I = 987654;
-
 describe("Bookshelf Operations (E2E)", () => {
-    let accessToken: string;
-    let userId: string;
+  // dados únicos por execução do arquivo de teste
+  const runId = randomUUID().slice(0, 8);
+  const testEmail = `e2e-shelf-ops-${runId}@email.com`;
+  const testUsername = `e2e-shelf-ops-user-${runId}`;
+  const testPassword = "senha123";
+  const testCoverI = 987654 + parseInt(runId, 16) % 100000; // cover_i único baseado no runId
 
-    beforeAll(async () => {
-        await app.ready();
+  let accessToken: string;
+  let userId: string;
 
-        const usersRepository = new DrizzleUsersRepository();
+  beforeAll(async () => {
+    await app.ready();
 
-        await db.delete(usersTable).where(eq(usersTable.email, TEST_EMAIL));
-        await db.delete(booksTable).where(eq(booksTable.externalId, String(TEST_COVER_I)));
+    const usersRepository = new DrizzleUsersRepository();
 
-        await app.inject({
-            method: "POST",
-            url: "/sign-up",
-            payload: {
-                name: "Shelf User",
-                username: TEST_USERNAME,
-                email: TEST_EMAIL,
-                password: "senha123",
-            },
-        });
+    await db.delete(usersTable).where(eq(usersTable.email, testEmail));
+    await db.delete(booksTable).where(eq(booksTable.externalId, String(testCoverI)));
 
-        const user = await usersRepository.findByEmail(TEST_EMAIL);
-        if (user) {
-            userId = user.id;
-            await usersRepository.markEmailAsVerified(user.id);
-        }
-
-        const signInResponse = await app.inject({
-            method: "POST",
-            url: "/sign-in",
-            payload: {
-                email: TEST_EMAIL,
-                password: "senha123",
-            },
-        });
-
-        const body = signInResponse.json();
-        accessToken = body.accessToken;
-
-        // Add a book to shelf to prepare for operations
-        await app.inject({
-            method: "POST",
-            url: "/add-book-shelf",
-            headers: {
-                authorization: `Bearer ${accessToken}`,
-            },
-            payload: {
-                title: "Refactoring",
-                author_name: ["Martin Fowler"],
-                cover_i: TEST_COVER_I,
-            },
-        });
+    const signUpResponse = await app.inject({
+      method: "POST",
+      url: "/sign-up",
+      payload: {
+        name: "Shelf User",
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      },
     });
 
-    beforeEach(async () => {
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
+    if (signUpResponse.statusCode !== 201) {
+      throw new Error(
+        `Sign-up falhou no setup do teste: ${signUpResponse.statusCode} - ${signUpResponse.body}`,
+      );
+    }
+
+    const user = await usersRepository.findByEmail(testEmail);
+    if (!user) throw new Error("Usuário não encontrado após sign-up");
+    userId = user.id;
+
+    await usersRepository.markEmailAsVerified(user.id);
+
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    const signInResponse = await app.inject({
+      method: "POST",
+      url: "/sign-in",
+      payload: {
+        email: testEmail,
+        password: testPassword,
+      },
     });
 
-    afterAll(async () => {
-        await db.delete(usersTable).where(eq(usersTable.email, TEST_EMAIL));
-        await db.delete(booksTable).where(eq(booksTable.externalId, String(TEST_COVER_I)));
-        await app.close();
+    if (signInResponse.statusCode !== 200) {
+      throw new Error(
+        `Sign-in falhou no setup do teste: ${signInResponse.statusCode} - ${signInResponse.body}`,
+      );
+    }
+
+    accessToken = signInResponse.json().accessToken;
+
+    // Add a book to shelf to prepare for operations
+    await app.inject({
+      method: "POST",
+      url: "/add-book-shelf",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      payload: {
+        title: `Refactoring ${runId}`,
+        author_name: ["Martin Fowler"],
+        cover_i: testCoverI,
+      },
+    });
+  });
+
+  beforeEach(async () => {
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+  });
+
+  afterAll(async () => {
+    // limpa o que este teste criou, precisamente por userId
+    const usersRepository = new DrizzleUsersRepository();
+    if (userId) {
+      await usersRepository.deleteById(userId);
+    }
+    await db.delete(booksTable).where(eq(booksTable.externalId, String(testCoverI)));
+    await app.close();
+  });
+
+  it("should show user bookshelf with 200", async () => {
+    const response = await app.inject({
+      method: "GET",
+      url: `/show-book-shelf/${userId}`,
     });
 
-    it("should show user bookshelf with 200", async () => {
-        const response = await app.inject({
-            method: "GET",
-            url: `/show-book-shelf/${userId}`,
-        });
-
-        expect(response.statusCode).toBe(200);
-        const body = response.json();
-        expect(body).toHaveProperty("books");
-        expect(Array.isArray(body.books)).toBe(true);
-        expect(body.books.some((b: { cover_i: number }) => b.cover_i === TEST_COVER_I)).toBe(true);
-    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body).toHaveProperty("books");
+    expect(Array.isArray(body.books)).toBe(true);
+    expect(body.books.some((b: { cover_i: number }) => b.cover_i === testCoverI)).toBe(true);
+  });
 
     it("should return 400 when user ID format is invalid on show bookshelf", async () => {
         const response = await app.inject({
@@ -101,67 +131,67 @@ describe("Bookshelf Operations (E2E)", () => {
         expect(response.statusCode).toBe(400);
     });
 
-    it("should edit book reading status with 200", async () => {
-        const response = await app.inject({
-            method: "POST",
-            url: "/edit-book-reading-status",
-            headers: {
-                authorization: `Bearer ${accessToken}`,
-            },
-            payload: {
-                cover_i: TEST_COVER_I,
-                readingStatus: "READING",
-            },
-        });
-
-        expect(response.statusCode).toBe(200);
-        expect(response.json()).toEqual({
-            message: "Book reading status updated successfully",
-        });
+  it("should edit book reading status with 200", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/edit-book-reading-status",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      payload: {
+        cover_i: testCoverI,
+        readingStatus: "READING",
+      },
     });
 
-    it("should edit book current reading page with 200", async () => {
-        const response = await app.inject({
-            method: "POST",
-            url: "/edit-book-reading-page",
-            headers: {
-                authorization: `Bearer ${accessToken}`,
-            },
-            payload: {
-                cover_i: TEST_COVER_I,
-                currentPage: 88,
-            },
-        });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      message: "Book reading status updated successfully",
+    });
+  });
 
-        expect(response.statusCode).toBe(200);
-        const body = response.json();
-        expect(body).toHaveProperty("message", "Current page updated successfully");
-        expect(body).toHaveProperty("currentPage", 88);
+  it("should edit book current reading page with 200", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/edit-book-reading-page",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      payload: {
+        cover_i: testCoverI,
+        currentPage: 88,
+      },
     });
 
-    it("should remove book from bookshelf with 200", async () => {
-        const response = await app.inject({
-            method: "POST",
-            url: "/remove-book-shelf",
-            headers: {
-                authorization: `Bearer ${accessToken}`,
-            },
-            payload: {
-                cover_i: TEST_COVER_I,
-            },
-        });
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body).toHaveProperty("message", "Current page updated successfully");
+    expect(body).toHaveProperty("currentPage", 88);
+  });
 
-        expect(response.statusCode).toBe(200);
-        expect(response.json()).toEqual({
-            message: "Book removed from shelf successfully",
-        });
-
-        // Verify book is removed from bookshelf
-        const checkResponse = await app.inject({
-            method: "GET",
-            url: `/show-book-shelf/${userId}`,
-        });
-        const checkBody = checkResponse.json();
-        expect(checkBody.books.some((b: { cover_i: number }) => b.cover_i === TEST_COVER_I)).toBe(false);
+  it("should remove book from bookshelf with 200", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/remove-book-shelf",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      payload: {
+        cover_i: testCoverI,
+      },
     });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      message: "Book removed from shelf successfully",
+    });
+
+    // Verify book is removed from bookshelf
+    const checkResponse = await app.inject({
+      method: "GET",
+      url: `/show-book-shelf/${userId}`,
+    });
+    const checkBody = checkResponse.json();
+    expect(checkBody.books.some((b: { cover_i: number }) => b.cover_i === testCoverI)).toBe(false);
+  });
 });

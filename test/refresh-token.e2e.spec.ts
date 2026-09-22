@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { randomUUID } from "node:crypto";
 import { app } from "../src/server";
 import { DrizzleUsersRepository } from "../src/app/repositories/drizzle/drizzle-users-repository";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
@@ -6,59 +7,91 @@ import { db } from "../src/index";
 import { usersTable } from "../src/infra/db/schema";
 import { eq } from "drizzle-orm";
 
-const TEST_EMAIL = "e2e_refresh@email.com";
-const TEST_USERNAME = "e2e_refresh_user";
-
 describe("Refresh Token (E2E)", () => {
-    let refreshToken: string;
+  // dados únicos por execução do arquivo de teste
+  const runId = randomUUID().slice(0, 8);
+  const testEmail = `e2e-refresh-${runId}@email.com`;
+  const testUsername = `e2e-refresh-user-${runId}`;
+  const testPassword = "senha123";
 
-    beforeAll(async () => {
-        await app.ready();
+  let refreshToken: string;
+  let userId: string;
 
-        const usersRepository = new DrizzleUsersRepository();
+  beforeAll(async () => {
+    await app.ready();
 
-        await db.delete(usersTable).where(eq(usersTable.email, TEST_EMAIL));
+    const usersRepository = new DrizzleUsersRepository();
 
-        await app.inject({
-            method: "POST",
-            url: "/sign-up",
-            payload: {
-                name: "Refresh User",
-                username: TEST_USERNAME,
-                email: TEST_EMAIL,
-                password: "senha123",
-            },
-        });
+    await db.delete(usersTable).where(eq(usersTable.email, testEmail));
 
-        const user = await usersRepository.findByEmail(TEST_EMAIL);
-        if (user) {
-            await usersRepository.markEmailAsVerified(user.id);
-        }
-
-        const signInResponse = await app.inject({
-            method: "POST",
-            url: "/sign-in",
-            payload: {
-                email: TEST_EMAIL,
-                password: "senha123",
-            },
-        });
-
-        const cookie = signInResponse.cookies.find((c) => c.name === "refreshToken");
-        refreshToken = cookie?.value ?? "";
+    const signUpResponse = await app.inject({
+      method: "POST",
+      url: "/sign-up",
+      payload: {
+        name: "Refresh User",
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      },
     });
 
-    beforeEach(async () => {
-        const keys = await rateLimitRedis.keys("api-books:rate-limit:*");
-        if (keys.length > 0) {
-            await rateLimitRedis.del(...keys);
-        }
+    if (signUpResponse.statusCode !== 201) {
+      throw new Error(
+        `Sign-up falhou no setup do teste: ${signUpResponse.statusCode} - ${signUpResponse.body}`,
+      );
+    }
+
+    const user = await usersRepository.findByEmail(testEmail);
+    if (!user) throw new Error("Usuário não encontrado após sign-up");
+    userId = user.id;
+
+    await usersRepository.markEmailAsVerified(user.id);
+
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+
+    const signInResponse = await app.inject({
+      method: "POST",
+      url: "/sign-in",
+      payload: {
+        email: testEmail,
+        password: testPassword,
+      },
     });
 
-    afterAll(async () => {
-        await db.delete(usersTable).where(eq(usersTable.email, TEST_EMAIL));
-        await app.close();
-    });
+    if (signInResponse.statusCode !== 200) {
+      throw new Error(
+        `Sign-in falhou no setup do teste: ${signInResponse.statusCode} - ${signInResponse.body}`,
+      );
+    }
+
+    const cookie = signInResponse.cookies.find((c) => c.name === "refreshToken");
+    refreshToken = cookie?.value ?? "";
+  });
+
+  beforeEach(async () => {
+    // limpa rate-limit só das chaves relacionadas a este usuário/execução
+    const keys = await rateLimitRedis.keys(
+      `api-books:rate-limit:*${testEmail}*`,
+    );
+    if (keys.length > 0) {
+      await rateLimitRedis.del(...keys);
+    }
+  });
+
+  afterAll(async () => {
+    // limpa o que este teste criou, precisamente por userId
+    const usersRepository = new DrizzleUsersRepository();
+    if (userId) {
+      await usersRepository.deleteById(userId);
+    }
+    await app.close();
+  });
 
     it("should generate a new access token using a valid refresh token cookie", async () => {
         const response = await app.inject({

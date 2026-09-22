@@ -41,4 +41,5 @@ export interface UsersRepository {
   markEmailAsVerified(id: string): Promise<void>;
   findVerificationToken(token: string): Promise<VerificationToken | null>;
   deleteVerificationToken(id: string): Promise<void>;
+  deleteById(id: string): Promise<void>;
 }

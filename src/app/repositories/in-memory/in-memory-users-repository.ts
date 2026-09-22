@@ -108,4 +108,9 @@ export class InMemoryUsersRepository implements UsersRepository {
   async deleteVerificationToken(id: string): Promise<void> {
     this.verificationTokens.delete(id);
   }
+
+  async deleteById(id: string): Promise<void> {
+    this.items = this.items.filter((user) => user.id !== id);
+    this.verificationTokens.delete(id);
+  }
 }
