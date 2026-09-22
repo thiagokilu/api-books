@@ -1,12 +1,24 @@
-# 📚 API Books
+# API Books
 
-API REST para gerenciamento de uma **estante virtual de livros**, permitindo que usuários criem suas contas, autentiquem-se, pesquisem livros e acompanhem seu progresso de leitura.
+API REST para uma estante virtual de livros. Usuários podem criar uma conta, autenticar-se, confirmar o e-mail, recuperar a senha, buscar livros e administrar os itens da própria estante.
 
-O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backend**, autenticação segura, testes automatizados, documentação da API e organização em camadas.
+## Status atual
 
----
+O núcleo da API está implementado e possui testes unitários e end-to-end. As rotas estão documentadas em OpenAPI/Swagger e o projeto conta com limitação de requisições via Redis.
 
-## 🚀 Tecnologias
+| Área | Situação |
+| --- | --- |
+| Cadastro, login, logout e renovação de token | Implementado |
+| Confirmação de e-mail e recuperação de senha | Implementado |
+| Perfil do usuário | Implementado |
+| Busca de livros | Implementado |
+| Estante: adicionar, listar, remover e atualizar leitura | Implementado |
+| Testes unitários e end-to-end | Implementados |
+| Cálculo automático de percentual de leitura | Pendente |
+| Dashboard, estatísticas e resumo da estante | Pendente |
+| CI/CD | Pendente |
+
+## Tecnologias
 
 <div align="center">
 
@@ -24,320 +36,148 @@ O projeto foi desenvolvido com foco em **boas práticas de desenvolvimento backe
 
 </div>
 
-### Backend
+- Node.js e TypeScript
+- Fastify, Zod e Swagger/OpenAPI
+- PostgreSQL com Drizzle ORM
+- Redis (sessões/tokens e rate limiting)
+- JWT, cookies e bcrypt
+- Resend para fluxos de e-mail
+- Vitest e ESLint
+- Docker Compose
 
-- **Node.js** — Runtime JavaScript
-- **TypeScript** — Tipagem estática
-- **Fastify** — Framework web
-- **JWT** — Autenticação baseada em tokens
-- **bcrypt** — Hash de senhas
-- **Zod** — Validação e tipagem de dados
-- **Resend** — Envio de e-mails
+## Rotas disponíveis
 
-### Banco de dados e Cache
+As rotas abaixo refletem a implementação atual. A referência completa de payloads e respostas está no Swagger.
 
-- **PostgreSQL** — Banco de dados relacional
-- **Drizzle ORM** — ORM TypeScript-first
-- **Redis** — Cache e armazenamento em memória
+| Método | Rota | Autenticação | Finalidade |
+| --- | --- | :---: | --- |
+| POST | `/sign-up` | Não | Criar conta |
+| POST | `/sign-in` | Não | Autenticar usuário |
+| POST | `/logout` | Sim | Encerrar sessão |
+| POST | `/refresh-token` | Não | Renovar token de acesso |
+| GET | `/me` | Sim | Obter perfil do usuário logado |
+| POST | `/edit` | Sim | Atualizar perfil |
+| POST | `/request-verification-email` | Sim | Solicitar e-mail de confirmação |
+| POST | `/verify-email` | Não | Confirmar e-mail |
+| POST | `/forgot-password` | Não | Iniciar recuperação de senha |
+| POST | `/request-password` | Não | Redefinir senha com token |
+| GET | `/books/search` | Não | Pesquisar livros por título ou autor |
+| POST | `/add-book-shelf` | Sim | Adicionar livro à estante |
+| GET | `/show-book-shelf/:userId` | Não | Consultar estante de um usuário |
+| POST | `/remove-book-shelf` | Sim | Remover livro da estante |
+| POST | `/edit-book-reading-status` | Sim | Alterar status de leitura |
+| POST | `/edit-book-reading-page` | Sim | Atualizar página atual |
 
-### Testes e qualidade
+## Pré-requisitos
 
-- **Vitest** — Testes automatizados
-- **Swagger / OpenAPI** — Documentação da API
-- **ESLint** — Padronização e qualidade do código
+- Node.js 20 ou superior
+- pnpm (o repositório contém `pnpm-lock.yaml`)
+- Docker e Docker Compose
 
-### DevOps
+## Como executar
 
-- **Docker**
-- **GitHub Actions**
-- **Git / GitHub**
+1. Instale as dependências:
 
----
+   ```bash
+   pnpm install
+   ```
 
-## ✨ Funcionalidades
+2. Crie seu arquivo de ambiente:
 
-### 🔐 Autenticação
+   ```bash
+   cp .env.example .env
+   ```
 
-- [x] Criar uma conta
-- [x] Fazer login
-- [x] Confirmar e-mail após o cadastro
-- [x] Enviar e-mail de confirmação via Resend
-- [x] Recuperar senha por e-mail
-- [x] Redefinir senha através de link enviado por e-mail
-- [x] Autenticação utilizando JWT
-- [x] Armazenamento seguro de senhas utilizando hash
+3. Ajuste o `.env`. Para usar os serviços do `docker-compose.yml` localmente, a configuração base é:
 
-### 📖 Livros e estante
+   ```env
+   NODE_ENV=development
+   DATABASE_URL="postgresql://docker:docker@localhost:5432/api_books"
+   REDIS_URL="redis://localhost:6378"
+   JWT_SECRET="uma-chave-com-no-minimo-32-caracteres"
+   JWT_REFRESH_SECRET="outra-chave-com-no-minimo-32-caracteres"
+   SALT_ROUNDS=10
+   APP_URL="http://localhost:3333"
+   RESEND_API_KEY=""
+   ```
 
-- [x] Pesquisar livros por título ou autor
-- [x] Adicionar livros à estante
-- [x] Remover livros da estante
-- [x] Alterar status de leitura
-- [x] Atualizar progresso de leitura
-- [ ] Calcular automaticamente o percentual de leitura
-- [ ] Exibir resumo da estante no dashboard
+   `APP_URL` é obrigatória. A chave do Resend pode ficar vazia enquanto os fluxos de e-mail não forem exercitados.
 
-### 👤 Perfil
+4. Inicie PostgreSQL e Redis:
 
-- [x] Editar dados do perfil
+   ```bash
+   docker compose up -d
+   ```
 
----
+5. Aplique as migrações do banco:
 
-## 📋 Requisitos funcionais
+   ```bash
+   pnpm exec drizzle-kit migrate
+   ```
 
-| ID   | Requisito                                                              | Status |
-| ---- | ---------------------------------------------------------------------- | :----: |
-| RF01 | O usuário deve conseguir criar uma conta.                              |   x    |
-| RF02 | O usuário deve conseguir fazer login.                                  |   x    |
-| RF03 | O sistema deve enviar um e-mail de confirmação após o cadastro.        |   x    |
-| RF04 | O usuário deve confirmar seu e-mail antes de acessar a estante.        |   x    |
-| RF05 | O usuário deve conseguir solicitar redefinição de senha por e-mail.    |   x    |
-| RF06 | O usuário deve conseguir redefinir sua senha através do link recebido. |   x    |
-| RF07 | O usuário deve conseguir pesquisar livros por título ou autor.         |   x    |
-| RF08 | O usuário deve conseguir adicionar um livro à sua estante.             |   x    |
-| RF09 | O usuário deve conseguir remover um livro da sua estante.              |   x    |
-| RF10 | O usuário deve conseguir alterar o status de leitura.                  |   x    |
-| RF11 | O usuário deve conseguir atualizar seu progresso de leitura.           |   x    |
-| RF12 | O sistema deve calcular automaticamente o percentual de leitura.       |   ⬜   |
-| RF13 | O sistema deve exibir um resumo da estante no dashboard.               |   ⬜   |
-| RF14 | O usuário deve conseguir editar seus dados de perfil.                  |   x    |
+6. Inicie a API:
 
----
+   ```bash
+   pnpm dev
+   ```
 
-## ⚙️ Requisitos não funcionais
+A aplicação escuta em `http://localhost:3333`.
 
-| ID    | Requisito                                                                        | Status |
-| ----- | -------------------------------------------------------------------------------- | :----: |
-| RNF01 | A aplicação deve ser responsiva.                                                 |   ⬜   |
-| RNF02 | Senhas devem ser armazenadas utilizando hash e a autenticação deve utilizar JWT. |   ⬜   |
-| RNF03 | A API deve retornar mensagens de erro padronizadas.                              |   ⬜   |
-| RNF04 | O projeto deve possuir testes automatizados e documentação via Swagger/OpenAPI.  |   ⬜   |
+## Documentação da API
 
-### Formato padrão de erro
+Com o servidor em execução, acesse [http://localhost:3333/docs](http://localhost:3333/docs) para explorar as rotas, schemas, autenticação Bearer e respostas pela interface Swagger UI.
 
-```json
-{
-  "error": {
-    "code": "INVALID_CREDENTIALS",
-    "message": "Invalid email or password"
-  }
-}
+## Qualidade e testes
+
+| Comando | Descrição |
+| --- | --- |
+| `pnpm test` | Executa todos os testes em modo watch |
+| `pnpm test:unit` | Executa os testes unitários |
+| `pnpm test:e2e` | Executa os testes end-to-end |
+| `pnpm test:coverage` | Gera relatório de cobertura |
+| `pnpm lint` | Verifica o código com ESLint |
+| `pnpm build` | Compila TypeScript para `build/` |
+
+Para uma execução única de toda a suíte, use:
+
+```bash
+pnpm exec vitest run
 ```
 
----
-
-## 🏗️ Arquitetura
-
-O projeto utiliza uma arquitetura organizada em camadas, buscando separar as responsabilidades da aplicação.
+## Estrutura do projeto
 
 ```text
 src/
-├── app/
-│   ├── controllers/
-│   ├── repositories/
-│   ├── use-cases/
-│   └── ...
-│
-├── lib/
-│
-├── middlewares/
-│
-├── routes/
-│
-├── server.ts
-└── ...
+├── app/                 # Casos de uso, erros e contratos de repositório
+├── infra/
+│   ├── db/              # Schema e relações do PostgreSQL
+│   ├── http/            # Rotas, controllers, schemas e middlewares
+│   └── lib/             # Ambiente, Redis, rate limit e utilitários
+├── index.ts             # Cliente Drizzle
+└── server.ts            # Configuração e inicialização do Fastify
 ```
 
-A ideia é manter:
+As migrações versionadas ficam em `drizzle/`.
 
-- **Controllers** → entrada e saída das requisições
-- **Use Cases** → regras de negócio
-- **Repositories** → acesso aos dados
-- **Routes** → definição dos endpoints
-- **Schemas** → validação dos dados
-- **Middlewares** → autenticação e comportamentos compartilhados
+## Segurança
 
----
+- Senhas protegidas com bcrypt.
+- Access e refresh tokens com JWT.
+- Rotas privadas protegidas por middleware de autenticação.
+- Validação de entrada e serialização com Zod.
+- Rate limiting global e limites específicos nas rotas sensíveis.
 
-## 🐳 Executando o projeto
+## Próximos passos
 
-### Pré-requisitos
+- Calcular e expor o percentual de leitura a partir de `currentPage` e `totalPages`.
+- Criar dashboard com resumo e estatísticas da estante.
+- Adicionar pipeline de CI para lint, build e testes.
+- Revisar a autorização da rota pública de consulta de estante conforme a política de privacidade desejada.
 
-Antes de começar, você precisa ter instalado:
+## Autor
 
-- Node.js
-- npm
-- Docker
-- Docker Compose
+Thiago Alexandre — [GitHub](https://github.com/thiagokilu)
 
-### 1. Clone o repositório
-
-```bash
-git clone <URL_DO_REPOSITORIO>
-
-cd api-books
-```
-
-### 2. Instale as dependências
-
-```bash
-npm install
-```
-
-### 3. Configure as variáveis de ambiente
-
-Crie um arquivo `.env` baseado no `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-Configure as variáveis necessárias, como:
-
-```env
-DATABASE_URL=
-
-JWT_SECRET=
-JWT_REFRESH_TOKEN=
-
-SALT_ROUNDS=10
-
-RESEND_API_KEY=
-```
-
-### 4. Suba o banco de dados
-
-```bash
-docker compose up -d
-```
-
-### 5. Execute a aplicação
-
-```bash
-npm run dev
-```
-
-A API estará disponível em:
-
-```text
-http://localhost:3333
-```
-
----
-
-## 📚 Documentação da API
-
-A API possui documentação utilizando **Swagger/OpenAPI**.
-
-Com o servidor em execução, acesse:
-
-```text
-http://localhost:3333/docs
-```
-
-A documentação permite visualizar os endpoints, parâmetros, schemas e realizar requisições diretamente pelo Swagger UI.
-
----
-
-## 🧪 Testes
-
-Para executar os testes:
-
-```bash
-npm test
-```
-
-Para executar os testes em modo de observação:
-
-```bash
-npm run test:watch
-```
-
-Para verificar a cobertura:
-
-```bash
-npm run test:coverage
-```
-
----
-
-## 🔒 Segurança
-
-O projeto utiliza algumas práticas para proteger os dados dos usuários:
-
-- 🔐 Senhas armazenadas utilizando **bcrypt**
-- 🎫 Autenticação utilizando **JWT**
-- 🔄 Refresh Token
-- ✉️ Confirmação de e-mail
-- 🔑 Recuperação de senha através de token
-- ✅ Validação de dados utilizando **Zod**
-- 🚫 Proteção de rotas autenticadas
-
----
-
-## 📈 Roadmap
-
-### Autenticação
-
-- [ ] Cadastro
-- [ ] Login
-- [ ] Refresh Token
-- [ ] Confirmação de e-mail
-- [ ] Recuperação de senha
-- [ ] Redefinição de senha
-
-### Biblioteca
-
-- [ ] Pesquisa de livros
-- [ ] Adicionar à estante
-- [ ] Remover da estante
-- [ ] Status de leitura
-- [ ] Progresso de leitura
-- [ ] Percentual automático
-
-### Usuário
-
-- [ ] Dashboard
-- [ ] Perfil
-- [ ] Estatísticas de leitura
-
-### Qualidade
-
-- [ ] Testes unitários
-- [ ] Testes de integração
-- [ ] Cobertura de testes
-- [ ] CI/CD
-- [ ] Documentação completa da API
-
----
-
-## 📦 Scripts
-
-| Comando                 | Descrição                            |
-| ----------------------- | ------------------------------------ |
-| `npm run dev`           | Inicia o servidor em desenvolvimento |
-| `npm test`              | Executa os testes                    |
-| `npm run test:watch`    | Executa os testes em modo watch      |
-| `npm run test:coverage` | Executa os testes com cobertura      |
-
----
-
-## 👨‍💻 Autor
-
-**Thiago Alexandre**
-
-Desenvolvedor Front-End / Full Stack em formação.
-
-<div align="left">
-
-<a href="https://github.com/thiagokilu">
-<img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" />
-</a>
-
-</div>
-
----
-
-## 📄 Licença
+## Licença
 
 Este projeto está sob a licença MIT.
