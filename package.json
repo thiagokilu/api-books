@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "tsx watch src/server.ts",
     "test": "vitest",
     "test:unit": "vitest --project unit",
     "test:e2e": "vitest --project e2e",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint . --ext .ts",
     "build": "tsc"
   },
@@ -39,6 +41,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/pg": "^8.23.1",
+    "@vitest/coverage-v8": "4.1.11",
     "drizzle-kit": "^1.0.0-rc.4",
     "eslint": "^10.9.1",
     "globals": "^17.12.0",

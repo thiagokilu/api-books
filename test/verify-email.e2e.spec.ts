@@ -3,7 +3,7 @@ import { app } from "../src/server";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
 import { db } from "../src/index";
 import { usersTable, verificationTokensTable } from "../src/infra/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { DrizzleUsersRepository } from "../src/app/repositories/drizzle/drizzle-users-repository";
 import { randomBytes } from "crypto";
 
@@ -20,14 +20,18 @@ describe("Verify Email (E2E)", () => {
 
         const usersRepository = new DrizzleUsersRepository();
 
-        const existingUser = await usersRepository.findByEmail(TEST_EMAIL);
-        if (existingUser) {
+        const existingUsers = await db
+            .select({ id: usersTable.id })
+            .from(usersTable)
+            .where(or(eq(usersTable.email, TEST_EMAIL), eq(usersTable.username, TEST_USERNAME)));
+
+        for (const existingUser of existingUsers) {
             await db.delete(verificationTokensTable).where(eq(verificationTokensTable.id, existingUser.id));
             await db.delete(usersTable).where(eq(usersTable.id, existingUser.id));
         }
 
         // 1. Cadastra usuário (emailVerified inicia como false)
-        await app.inject({
+        const signUpResponse = await app.inject({
             method: "POST",
             url: "/sign-up",
             payload: {
@@ -37,11 +41,13 @@ describe("Verify Email (E2E)", () => {
                 password: PASSWORD,
             },
         });
+        expect(signUpResponse.statusCode).toBe(201);
 
         const createdUser = await usersRepository.findByEmail(TEST_EMAIL);
-        if (createdUser) {
-            userId = createdUser.id;
+        if (!createdUser) {
+            throw new Error("The verification test user was not created");
         }
+        userId = createdUser.id;
 
         // 2. Faz login para obter o access token
         const signInResponse = await app.inject({
