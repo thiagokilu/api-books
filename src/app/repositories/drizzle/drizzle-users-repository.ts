@@ -1,7 +1,7 @@
 // repositories/drizzle/drizzle-users-repository.ts
 import { db } from "../../../index";
 import { usersTable, verificationTokensTable } from "../../../infra/db/schema";
-import { eq, or } from "drizzle-orm";
+import { eq, or, like } from "drizzle-orm";
 import type {
   UsersRepository,
   CreateUserData,
@@ -50,6 +50,15 @@ export class DrizzleUsersRepository implements UsersRepository {
       .limit(1);
 
     return result[0] ?? null;
+  }
+
+  async searchByUsername(username: string): Promise<User[]> {
+    const result = await db
+      .select()
+      .from(usersTable)
+      .where(like(usersTable.username, `%${username}%`));
+
+    return result;
   }
 
   async findByEmailOrUsername(

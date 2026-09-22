@@ -63,6 +63,7 @@ As rotas abaixo refletem a implementação atual. A referência completa de payl
 | GET | `/books/search` | Não | Pesquisar livros por título ou autor |
 | POST | `/add-book-shelf` | Sim | Adicionar livro à estante |
 | GET | `/show-book-shelf/:userId` | Não | Consultar estante de um usuário |
+| GET | `/users/:username/reading` | Não | Consultar estante pública de um usuário |
 | POST | `/remove-book-shelf` | Sim | Remover livro da estante |
 | POST | `/edit-book-reading-status` | Sim | Alterar status de leitura |
 | POST | `/edit-book-reading-page` | Sim | Atualizar página atual |

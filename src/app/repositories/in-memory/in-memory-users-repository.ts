@@ -38,6 +38,10 @@ export class InMemoryUsersRepository implements UsersRepository {
     return this.items.find((user) => user.username === username) ?? null;
   }
 
+  async searchByUsername(username: string) {
+    return this.items.filter((user) => user.username.includes(username));
+  }
+
   async findByEmailOrUsername(email: string, username: string) {
     return (
       this.items.find(

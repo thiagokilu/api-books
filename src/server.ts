@@ -29,6 +29,8 @@ import { removeBookShelfRoute } from "./infra/http/routes/remove-book-shelf-rout
 import { showBookShelfRoute } from "./infra/http/routes/show-book-shelf-route";
 import { editBookReadingStatusRoute } from "./infra/http/routes/edit-book-reading-status-route";
 import { editBookReadingPageRoute } from "./infra/http/routes/edit-book-current-page-route";
+import { searchUsersRoute } from "./infra/http/routes/search-users-route";
+import { showPublicBookShelfRoute } from "./infra/http/routes/show-public-book-shelf-route";  
 
 export const app = fastify();
 
@@ -102,6 +104,8 @@ typedApp.register(removeBookShelfRoute);
 typedApp.register(showBookShelfRoute);
 typedApp.register(editBookReadingStatusRoute);
 typedApp.register(editBookReadingPageRoute);
+typedApp.register(searchUsersRoute);
+typedApp.register(showPublicBookShelfRoute);
 
 const start = async () => {
   try {
