@@ -112,7 +112,10 @@ describe("Bookshelf Operations (E2E)", () => {
   it("should show user bookshelf with 200", async () => {
     const response = await app.inject({
       method: "GET",
-      url: `/show-book-shelf/${userId}`,
+      url: `/show-book-shelf`,
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
     });
 
     expect(response.statusCode).toBe(200);
@@ -121,15 +124,6 @@ describe("Bookshelf Operations (E2E)", () => {
     expect(Array.isArray(body.books)).toBe(true);
     expect(body.books.some((b: { cover_i: number }) => b.cover_i === testCoverI)).toBe(true);
   });
-
-    it("should return 400 when user ID format is invalid on show bookshelf", async () => {
-        const response = await app.inject({
-            method: "GET",
-            url: "/show-book-shelf/invalid-uuid",
-        });
-
-        expect(response.statusCode).toBe(400);
-    });
 
   it("should edit book reading status with 200", async () => {
     const response = await app.inject({
@@ -189,8 +183,12 @@ describe("Bookshelf Operations (E2E)", () => {
     // Verify book is removed from bookshelf
     const checkResponse = await app.inject({
       method: "GET",
-      url: `/show-book-shelf/${userId}`,
+      url: `/show-book-shelf`,
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
     });
+    
     const checkBody = checkResponse.json();
     expect(checkBody.books.some((b: { cover_i: number }) => b.cover_i === testCoverI)).toBe(false);
   });

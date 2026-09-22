@@ -13,6 +13,7 @@ export class DrizzleBooksRepository implements BooksRepository {
         externalId,
         title: data.title,
         author: data.author_name.join(", "),
+        totalPages: data.totalPages,
         coverUrl: `https://covers.openlibrary.org/b/id/${data.cover_i}-M.jpg`,
       })
       .onConflictDoNothing({ target: booksTable.externalId });
@@ -88,6 +89,7 @@ export class DrizzleBooksRepository implements BooksRepository {
         cover_i: Number.parseInt(userBook.book!.externalId, 10),
         status: userBook.status as "WANT_TO_READ" | "READING" | "COMPLETED",
         currentPage: userBook.currentPage,
+        totalPages: userBook.book!.totalPages,
       }));
   }
 

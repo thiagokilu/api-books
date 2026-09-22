@@ -18,6 +18,8 @@ describe("showBookShelfUseCase", () => {
       cover_i: 8065615,
       status: "WANT_TO_READ" as const,
       currentPage: 0,
+      totalPages: 0,
+      readingPercentage: 0,
     };
 
     await booksRepository.addBookToShelf(book);
