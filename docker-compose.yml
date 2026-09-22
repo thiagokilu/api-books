@@ -20,3 +20,22 @@ services:
       - "6378:6379"
     volumes:
       - ./redis-data:/bitnami/redis/data
+
+  api:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: booksapi-app
+    ports:
+      - "3333:3333"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://docker:docker@postgres:5432/api_books
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      SALT_ROUNDS: 10
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
