@@ -36,7 +36,7 @@ describe("addBookToShelfUseCase", () => {
     await expect(
       booksRepository.showBooksFromShelf({ userId: user.id }),
     ).resolves.toEqual([
-      { ...book, status: "WANT_TO_READ", currentPage: 0 },
+      { ...book, status: "WANT_TO_READ", currentPage: 0, totalPages: 0 },
     ]);
   });
 

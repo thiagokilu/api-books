@@ -6,6 +6,9 @@ export interface IBookShelfResponse {
     author_name: string[];
     cover_i: number;
     status: "WANT_TO_READ" | "READING" | "COMPLETED";
+    currentPage?: number;
+    totalPages?: number;
+    readingPercentage?: number;
   }[];
 }
 
@@ -19,6 +22,12 @@ export async function showBookShelfUseCase(
     books: books.map((book) => ({
       ...book,
       status: book.status ?? "WANT_TO_READ",
+      currentPage: book.currentPage ?? 0,
+      totalPages: book.totalPages ?? 0,
+      readingPercentage:
+        book.currentPage && book.totalPages && book.totalPages > 0
+          ? Math.round((book.currentPage / book.totalPages) * 100)
+          : 0,
     })),
   };
 }

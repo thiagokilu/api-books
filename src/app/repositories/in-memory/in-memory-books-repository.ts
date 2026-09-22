@@ -8,6 +8,7 @@ export class InMemoryBooksRepository implements BooksRepository {
         ...data,
         status: data.status ?? "WANT_TO_READ",
         currentPage: data.currentPage ?? 0,
+        totalPages: data.totalPages ?? 0,
       });
     }
     this.store.set(data.userId, userBooks);

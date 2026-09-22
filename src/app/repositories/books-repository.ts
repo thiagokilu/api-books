@@ -5,6 +5,7 @@ export interface addBookToShelf {
   cover_i: number;
   status?: "WANT_TO_READ" | "READING" | "COMPLETED";
   currentPage?: number;
+  totalPages?: number | null;
 }
 
 export interface BooksRepository {
