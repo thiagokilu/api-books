@@ -169,7 +169,6 @@ As migrações versionadas ficam em `drizzle/`.
 - Rate limiting global e limites específicos nas rotas sensíveis.
 - Access token com vida curta (15 minutos) e refresh token com vida longa (7 dias).
 
-## Próximos passos
 
 
 ## Autor
