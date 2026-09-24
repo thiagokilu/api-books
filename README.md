@@ -171,7 +171,6 @@ As migrações versionadas ficam em `drizzle/`.
 
 ## Próximos passos
 
-- Revisar a autorização da rota pública de consulta de estante conforme a política de privacidade desejada.
 
 ## Autor
 
