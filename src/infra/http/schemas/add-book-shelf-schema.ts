@@ -3,8 +3,17 @@ import { z } from "zod";
 const addBookShelfByIdSchema = z.object({
   id: z.string().min(1, "Book ID is required"),
   title: z.string().min(1, "Title is required"),
+  subtitle: z.string().optional(),
   authors: z.array(z.string()).min(1, "At least one author name is required"),
   coverUrl: z.string().url().optional(),
+  description: z.string().optional(),
+  publisher: z.string().optional(),
+  language: z.string().optional(),
+  publishedDate: z.string().optional(),
+  publishedYear: z.number().int().optional(),
+  categories: z.array(z.string()).optional(),
+  isbn: z.string().optional(),
+  infoLink: z.string().url().optional(),
   pageCount: z.number().int().positive().optional(),
 });
 

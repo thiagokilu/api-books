@@ -56,6 +56,7 @@ describe("showPublicBookShelfUseCase", () => {
           status: "READING",
           currentPage: 50,
           totalPages: 200,
+          pageCount: 200,
           readingPercentage: 25,
         },
       ],

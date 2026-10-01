@@ -26,7 +26,7 @@ describe("showBookShelfUseCase", () => {
     const result = await showBookShelfUseCase(booksRepository, userId);
 
     expect(result).toEqual({
-      books: [{ ...book, readingPercentage: 0 }],
+      books: [{ ...book, pageCount: 0, readingPercentage: 0 }],
     });
   });
 

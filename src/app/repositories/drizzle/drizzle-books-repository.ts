@@ -12,11 +12,37 @@ export class DrizzleBooksRepository implements BooksRepository {
       .values({
         externalId,
         title: data.title,
+        subtitle: data.subtitle,
         author: data.authors.join(", "),
         totalPages: data.totalPages,
         coverUrl: data.coverUrl,
+        description: data.description,
+        publisher: data.publisher,
+        language: data.language,
+        publishedDate: data.publishedDate,
+        publishedYear: data.publishedYear,
+        categories: data.categories,
+        isbn: data.isbn,
+        infoLink: data.infoLink,
       })
-      .onConflictDoNothing({ target: booksTable.externalId });
+      .onConflictDoUpdate({
+        target: booksTable.externalId,
+        set: {
+          title: data.title,
+          subtitle: data.subtitle,
+          author: data.authors.join(", "),
+          coverUrl: data.coverUrl,
+          description: data.description,
+          publisher: data.publisher,
+          language: data.language,
+          publishedDate: data.publishedDate,
+          publishedYear: data.publishedYear,
+          categories: data.categories,
+          isbn: data.isbn,
+          infoLink: data.infoLink,
+          totalPages: data.totalPages,
+        },
+      });
 
     const book = await db.query.booksTable.findFirst({
       where: { externalId },
@@ -84,9 +110,34 @@ export class DrizzleBooksRepository implements BooksRepository {
         userId: data.userId,
         id: userBook.book!.externalId,
         title: userBook.book!.title,
+        ...(userBook.book!.subtitle
+          ? { subtitle: userBook.book!.subtitle }
+          : {}),
         authors: userBook.book!.author ? userBook.book!.author.split(", ") : [],
         ...(userBook.book!.coverUrl
           ? { coverUrl: userBook.book!.coverUrl }
+          : {}),
+        ...(userBook.book!.description
+          ? { description: userBook.book!.description }
+          : {}),
+        ...(userBook.book!.publisher
+          ? { publisher: userBook.book!.publisher }
+          : {}),
+        ...(userBook.book!.language
+          ? { language: userBook.book!.language }
+          : {}),
+        ...(userBook.book!.publishedDate
+          ? { publishedDate: userBook.book!.publishedDate }
+          : {}),
+        ...(userBook.book!.publishedYear !== null
+          ? { publishedYear: userBook.book!.publishedYear }
+          : {}),
+        ...(userBook.book!.categories
+          ? { categories: userBook.book!.categories }
+          : {}),
+        ...(userBook.book!.isbn ? { isbn: userBook.book!.isbn } : {}),
+        ...(userBook.book!.infoLink
+          ? { infoLink: userBook.book!.infoLink }
           : {}),
         status: userBook.status as "WANT_TO_READ" | "READING" | "COMPLETED",
         currentPage: userBook.currentPage,

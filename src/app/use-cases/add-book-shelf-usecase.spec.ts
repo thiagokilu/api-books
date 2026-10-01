@@ -25,6 +25,15 @@ describe("addBookToShelfUseCase", () => {
       title: "Clean Code",
       authors: ["Robert C. Martin"],
       coverUrl: "https://example.com/cover.jpg",
+      subtitle: "A Handbook of Agile Software Craftsmanship",
+      description: "A practical guide to writing clean code.",
+      publisher: "Prentice Hall",
+      language: "en",
+      publishedDate: "2008-08-01",
+      publishedYear: 2008,
+      categories: ["Computers"],
+      isbn: "9780132350884",
+      infoLink: "https://books.google.com/books?id=clean-code",
     };
 
     const result = await addBookToShelfUseCase(
