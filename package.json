@@ -10,7 +10,8 @@
     "test:e2e": "vitest --project e2e",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint . --ext .ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node build/server.js"
   },
   "keywords": [],
   "type": "module",
