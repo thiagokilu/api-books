@@ -25,10 +25,15 @@ describe("Search Books (E2E)", () => {
       url: "/books/search?query=clean+code",
     });
 
+    if (response.statusCode !== 200) {
+      console.log("Response body:", response.json());
+    }
+
     expect(response.statusCode).toBe(200);
     const body = response.json();
-    expect(body).toHaveProperty("docs");
-    expect(Array.isArray(body.docs)).toBe(true);
+    expect(body).toHaveProperty("total");
+    expect(body).toHaveProperty("books");
+    expect(Array.isArray(body.books)).toBe(true);
   });
 
   it("should return 400 when query parameter is missing", async () => {

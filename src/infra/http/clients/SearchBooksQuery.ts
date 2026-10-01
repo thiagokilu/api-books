@@ -1,19 +1,24 @@
-import type { OpenLibraryClient } from "../../../app/use-cases/search-books-usecase";
+import type { GoogleBooksClient } from "../../../app/use-cases/search-books-usecase";
 
-export function makeOpenLibraryClient(): OpenLibraryClient {
+export function makeGoogleBooksClient(): GoogleBooksClient {
   return {
     async searchBooks(query: string) {
+      const params = new URLSearchParams({
+        q: query,
+        maxResults: "20",
+      });
+
+      // Opcional, mas recomendado
+      if (process.env.GOOGLE_BOOKS_API_KEY) {
+        params.set("key", process.env.GOOGLE_BOOKS_API_KEY);
+      }
+
       const response = await fetch(
-        `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`,
-        {
-          headers: {
-            "User-Agent": "API-Books (seu-email@email.com)",
-          },
-        },
+        `https://www.googleapis.com/books/v1/volumes?${params.toString()}`,
       );
 
       if (!response.ok) {
-        throw new Error("Failed to search books on Open Library");
+        throw new Error("Failed to search books on Google Books");
       }
 
       return response.json();

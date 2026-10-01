@@ -1,8 +1,8 @@
 import { searchBooksUseCase } from "../search-books-usecase";
-import { makeOpenLibraryClient } from "../../../infra/http/clients/SearchBooksQuery";
+import { makeGoogleBooksClient } from "../../../infra/http/clients/SearchBooksQuery";
 
 export function makeSearchBooksUseCase() {
-  const openLibraryClient = makeOpenLibraryClient();
+  const googleBooksClient = makeGoogleBooksClient();
 
-  return searchBooksUseCase(openLibraryClient);
+  return searchBooksUseCase(googleBooksClient);
 }

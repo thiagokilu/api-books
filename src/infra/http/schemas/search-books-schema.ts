@@ -5,25 +5,23 @@ export const searchBooksSchema = z.object({
 });
 
 export const searchBooksSuccessResponseSchema = z.object({
-  docs: z.array(
+  total: z.number(),
+  books: z.array(
     z.object({
+      id: z.string(),
       title: z.string(),
-      author_name: z.array(z.string()).optional(),
-      author_key: z.array(z.string()).optional(),
-      publish_year: z.array(z.number()).optional(),
-      cover_i: z.number().optional(),
-      cover_edition_key: z.string().optional(),
-      cover_height: z.number().optional(),
-      cover_width: z.number().optional(),
-      ebook_access: z.string().optional(),
-      edition_count: z.number().optional(),
-      first_publish_year: z.number().optional(),
-      has_fulltext: z.boolean().optional(),
-      key: z.string().optional(),
-      language: z.array(z.string()).optional(),
-      public_scan_b: z.boolean().optional(),
-      series_name: z.array(z.string()).optional(),
-      series_position: z.array(z.string()).optional(),
+      subtitle: z.string().optional(),
+      authors: z.array(z.string()),
+      publisher: z.string().optional(),
+      publishedDate: z.string().optional(),
+      publishedYear: z.number().optional(),
+      description: z.string().optional(),
+      pageCount: z.number().optional(),
+      categories: z.array(z.string()),
+      language: z.string().optional(),
+      coverUrl: z.string().optional(),
+      isbn: z.string().optional(),
+      infoLink: z.string().optional(),
     }),
   ),
 });

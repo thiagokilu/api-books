@@ -1,54 +1,56 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import {
   searchBooksUseCase,
-  type OpenLibraryClient,
+  type GoogleBooksClient,
 } from "./search-books-usecase";
 
-let openLibraryClient: OpenLibraryClient;
+let googleBooksClient: GoogleBooksClient;
 let searchBooks: ReturnType<typeof searchBooksUseCase>;
 
 describe("SearchBooksUseCase", () => {
   beforeEach(() => {
-    openLibraryClient = {
+    googleBooksClient = {
       searchBooks: vi.fn(),
     };
-    searchBooks = searchBooksUseCase(openLibraryClient);
+    searchBooks = searchBooksUseCase(googleBooksClient);
   });
 
   it("should be able to search books by query", async () => {
     const mockResponse = {
-      docs: [
+      totalItems: 1,
+      items: [
         {
-          title: "The Lord of the Rings",
-          author_name: ["J.R.R. Tolkien"],
-          publish_year: [1954],
-          cover_i: 12345,
-          first_publish_year: 1954,
-          key: "/works/OL27448W",
+          id: "book1",
+          volumeInfo: {
+            title: "The Lord of the Rings",
+            authors: ["J.R.R. Tolkien"],
+            publishedDate: "1954",
+            categories: ["Fantasy"],
+          },
         },
       ],
     };
 
-    vi.mocked(openLibraryClient.searchBooks).mockResolvedValue(mockResponse);
+    vi.mocked(googleBooksClient.searchBooks).mockResolvedValue(mockResponse);
 
     const result = await searchBooks({ query: "the lord of the rings" });
 
-    expect(openLibraryClient.searchBooks).toHaveBeenCalledTimes(1);
-    expect(openLibraryClient.searchBooks).toHaveBeenCalledWith(
+    expect(googleBooksClient.searchBooks).toHaveBeenCalledTimes(1);
+    expect(googleBooksClient.searchBooks).toHaveBeenCalledWith(
       "the lord of the rings",
     );
-    expect(result).toEqual(mockResponse);
-    expect(result.docs).toHaveLength(1);
-    expect(result.docs[0]?.title).toBe("The Lord of the Rings");
+    expect(result.total).toBe(1);
+    expect(result.books).toHaveLength(1);
+    expect(result.books[0]?.title).toBe("The Lord of the Rings");
   });
 
   it("should propagate error when client throws an error", async () => {
-    vi.mocked(openLibraryClient.searchBooks).mockRejectedValue(
-      new Error("Failed to search books on Open Library"),
+    vi.mocked(googleBooksClient.searchBooks).mockRejectedValue(
+      new Error("Failed to search books on Google Books"),
     );
 
     await expect(
       searchBooks({ query: "error-query" }),
-    ).rejects.toThrow("Failed to search books on Open Library");
+    ).rejects.toThrow("Failed to search books on Google Books");
   });
 });
