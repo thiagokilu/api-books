@@ -11,6 +11,8 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint . --ext .ts",
     "build": "tsc",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "start": "tsx src/server.ts"
   },
   "keywords": [],
