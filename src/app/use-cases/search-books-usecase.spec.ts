@@ -22,6 +22,9 @@ describe("SearchBooksUseCase", () => {
           title: "The Lord of the Rings",
           author_name: ["J.R.R. Tolkien"],
           publish_year: [1954],
+          cover_i: 12345,
+          first_publish_year: 1954,
+          key: "/works/OL27448W",
         },
       ],
     };

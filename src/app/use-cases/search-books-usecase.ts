@@ -3,12 +3,7 @@ export interface ISearchBooksUseCaseRequest {
 }
 
 export interface ISearchBooksUseCaseResponse {
-  docs: Array<{
-    title: string;
-    author_name?: string[];
-    publish_year?: number[];
-    cover_i?: number;
-  }>;
+  docs: Array<Record<string, any>>;
 }
 
 export interface OpenLibraryClient {
