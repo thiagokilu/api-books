@@ -6,16 +6,18 @@ export async function addBookShelfController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { title, author_name, cover_i } =
+  const { id, title, authors, coverUrl, pageCount } =
     request.body as AddBookShelfBodySchema;
 
   // Call the use case to add the book to the user's bookshelf
   try {
     const bookData = {
       userId: request.userId,
+      id,
       title,
-      author_name,
-      cover_i,
+      authors,
+      ...(coverUrl ? { coverUrl } : {}),
+      ...(pageCount !== undefined ? { pageCount } : {}),
     };
 
     const addBookToShelf = makeAddBookToShelfUseCase();

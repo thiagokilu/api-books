@@ -6,13 +6,13 @@ export async function editBookReadingStatusController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { cover_i, readingStatus } =
+  const { id, readingStatus } =
     request.body as EditBookReadingStatusBodySchema;
 
   try {
     const bookData = {
       userId: request.userId,
-      cover_i,
+      id,
       readingStatus,
     };
 

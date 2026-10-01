@@ -22,14 +22,14 @@ describe("editBookReadingPageUseCase", () => {
 
     await booksRepository.addBookToShelf({
       userId: user.id,
+      id: "clean-code",
       title: "Clean Code",
-      author_name: ["Robert C. Martin"],
-      cover_i: 8065615,
+      authors: ["Robert C. Martin"],
     });
 
     await booksRepository.editBookCurrentPage({
       userId: user.id,
-      cover_i: 8065615,
+      id: "clean-code",
       currentPage: 100,
     });
 

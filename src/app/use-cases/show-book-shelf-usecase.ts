@@ -2,9 +2,11 @@ import type { BooksRepository } from "../repositories/books-repository";
 
 export interface IBookShelfResponse {
   books: {
+    userId?: string;
+    id: string;
     title: string;
-    author_name: string[];
-    cover_i: number;
+    authors: string[];
+    coverUrl?: string;
     status: "WANT_TO_READ" | "READING" | "COMPLETED";
     currentPage?: number;
     totalPages?: number;
@@ -20,7 +22,11 @@ export async function showBookShelfUseCase(
 
   return {
     books: books.map((book) => ({
-      ...book,
+      userId: book.userId,
+      id: book.id,
+      title: book.title,
+      authors: book.authors,
+      ...(book.coverUrl ? { coverUrl: book.coverUrl } : {}),
       status: book.status ?? "WANT_TO_READ",
       currentPage: book.currentPage ?? 0,
       totalPages: book.totalPages ?? 0,

@@ -3,16 +3,20 @@ import type { UsersRepository } from "../repositories/users-repository";
 
 interface IBookShelfRequest {
   userId: string;
+  id: string;
   title: string;
-  author_name: string[];
-  cover_i: number;
+  authors: string[];
+  coverUrl?: string;
+  pageCount?: number;
 }
 
 export interface IBookShelfResponse {
   userId: string;
+  id: string;
   title: string;
-  author_name: string[];
-  cover_i: number;
+  authors: string[];
+  coverUrl?: string;
+  pageCount?: number;
 }
 
 export async function addBookToShelfUseCase(
@@ -26,12 +30,21 @@ export async function addBookToShelfUseCase(
     throw new Error("User not found");
   }
 
-  await booksRepository.addBookToShelf(data);
+  await booksRepository.addBookToShelf({
+    userId: data.userId,
+    id: data.id,
+    title: data.title,
+    authors: data.authors,
+    ...(data.coverUrl ? { coverUrl: data.coverUrl } : {}),
+    ...(data.pageCount !== undefined ? { totalPages: data.pageCount } : {}),
+  });
 
   return {
     userId: data.userId,
+    id: data.id,
     title: data.title,
-    author_name: data.author_name,
-    cover_i: data.cover_i,
+    authors: data.authors,
+    ...(data.coverUrl ? { coverUrl: data.coverUrl } : {}),
+    ...(data.pageCount !== undefined ? { pageCount: data.pageCount } : {}),
   };
 }

@@ -5,11 +5,11 @@ export async function removeBookShelfController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { cover_i } = request.body as { cover_i: number };
+  const { id } = request.body as { id: string };
 
   try {
     const removeBookFromShelf = makeRemoveBookShelfUseCase();
-    await removeBookFromShelf({ userId: request.userId, cover_i });
+    await removeBookFromShelf({ userId: request.userId, id });
 
     return reply
       .status(200)

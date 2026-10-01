@@ -22,15 +22,15 @@ describe("editBookReadingStatusUseCase", () => {
 
     await booksRepository.addBookToShelf({
       userId: user.id,
+      id: "clean-code",
       title: "Clean Code",
-      author_name: ["Robert C. Martin"],
-      cover_i: 8065615,
+      authors: ["Robert C. Martin"],
     });
 
     await editBookReadingStatusUseCase(
       {
         userId: user.id,
-        cover_i: 8065615,
+        id: "clean-code",
         readingStatus: "READING",
       },
       booksRepository,
@@ -46,7 +46,7 @@ describe("editBookReadingStatusUseCase", () => {
       editBookReadingStatusUseCase(
         {
           userId: "non-existent-user-id",
-          cover_i: 8065615,
+          id: "clean-code",
           readingStatus: "READING",
         },
         booksRepository,

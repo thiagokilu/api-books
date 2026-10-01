@@ -1,10 +1,7 @@
 import { z } from "zod";
 
 export const editBookReadingStatusBodySchema = z.object({
-  cover_i: z
-    .number()
-    .int()
-    .nonnegative("Cover ID must be a non-negative integer"),
+  id: z.string().min(1, "Book ID is required"),
   readingStatus: z.enum(["WANT_TO_READ", "READING", "COMPLETED"]),
 });
 

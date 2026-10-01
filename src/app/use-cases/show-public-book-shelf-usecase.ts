@@ -14,9 +14,10 @@ export interface IBookShelfResponse {
     bio: string | null;
   };
   books: {
+    id: string;
     title: string;
-    author_name: string[];
-    cover_i: number;
+    authors: string[];
+    coverUrl?: string;
     status: "WANT_TO_READ" | "READING" | "COMPLETED";
     currentPage?: number;
     totalPages?: number;
@@ -44,9 +45,10 @@ export async function showPublicBookShelfUseCase(
       bio: user.bio ?? null,
     },
     books: books.map((book) => ({
+      id: book.id,
       title: book.title,
-      author_name: book.author_name,
-      cover_i: book.cover_i,
+      authors: book.authors,
+      ...(book.coverUrl ? { coverUrl: book.coverUrl } : {}),
       status: book.status ?? "WANT_TO_READ",
       currentPage: book.currentPage ?? 0,
       totalPages: book.totalPages ?? 0,

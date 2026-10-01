@@ -21,9 +21,10 @@ describe("addBookToShelfUseCase", () => {
     });
     const book = {
       userId: user.id,
+      id: "google-books-id-123",
       title: "Clean Code",
-      author_name: ["Robert C. Martin"],
-      cover_i: 8065615,
+      authors: ["Robert C. Martin"],
+      coverUrl: "https://example.com/cover.jpg",
     };
 
     const result = await addBookToShelfUseCase(
@@ -43,9 +44,10 @@ describe("addBookToShelfUseCase", () => {
   it("should not be able to add a book for a non-existent user", async () => {
     const book = {
       userId: "non-existent-user",
+      id: "google-books-id-123",
       title: "Clean Code",
-      author_name: ["Robert C. Martin"],
-      cover_i: 8065615,
+      authors: ["Robert C. Martin"],
+      coverUrl: "https://example.com/cover.jpg",
     };
 
     await expect(

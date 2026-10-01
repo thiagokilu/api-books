@@ -3,7 +3,7 @@ import type { UsersRepository } from "../repositories/users-repository";
 
 interface IEditBookReadingPageRequest {
   userId: string;
-  cover_i: number;
+  id: string;
   currentPage: number;
 }
 

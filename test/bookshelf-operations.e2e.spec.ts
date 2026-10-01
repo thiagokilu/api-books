@@ -13,7 +13,7 @@ describe("Bookshelf Operations (E2E)", () => {
   const testEmail = `e2e-shelf-ops-${runId}@email.com`;
   const testUsername = `e2e-shelf-ops-user-${runId}`;
   const testPassword = "senha123";
-  const testCoverI = 987654 + parseInt(runId, 16) % 100000; // cover_i único baseado no runId
+  const testVolumeId = `google-books-${runId}`;
 
   let accessToken: string;
   let userId: string;
@@ -24,7 +24,7 @@ describe("Bookshelf Operations (E2E)", () => {
     const usersRepository = new DrizzleUsersRepository();
 
     await db.delete(usersTable).where(eq(usersTable.email, testEmail));
-    await db.delete(booksTable).where(eq(booksTable.externalId, String(testCoverI)));
+    await db.delete(booksTable).where(eq(booksTable.externalId, testVolumeId));
 
     const signUpResponse = await app.inject({
       method: "POST",
@@ -75,7 +75,7 @@ describe("Bookshelf Operations (E2E)", () => {
     accessToken = signInResponse.json().accessToken;
 
     // Add a book to shelf to prepare for operations
-    await app.inject({
+    const addBookResponse = await app.inject({
       method: "POST",
       url: "/add-book-shelf",
       headers: {
@@ -83,10 +83,16 @@ describe("Bookshelf Operations (E2E)", () => {
       },
       payload: {
         title: `Refactoring ${runId}`,
-        author_name: ["Martin Fowler"],
-        cover_i: testCoverI,
+        id: testVolumeId,
+        authors: ["Martin Fowler"],
       },
     });
+
+    if (addBookResponse.statusCode !== 201) {
+      throw new Error(
+        `Adição do livro falhou no setup do teste: ${addBookResponse.statusCode} - ${addBookResponse.body}`,
+      );
+    }
   });
 
   beforeEach(async () => {
@@ -105,7 +111,7 @@ describe("Bookshelf Operations (E2E)", () => {
     if (userId) {
       await usersRepository.deleteById(userId);
     }
-    await db.delete(booksTable).where(eq(booksTable.externalId, String(testCoverI)));
+    await db.delete(booksTable).where(eq(booksTable.externalId, testVolumeId));
     await app.close();
   });
 
@@ -122,7 +128,9 @@ describe("Bookshelf Operations (E2E)", () => {
     const body = response.json();
     expect(body).toHaveProperty("books");
     expect(Array.isArray(body.books)).toBe(true);
-    expect(body.books.some((b: { cover_i: number }) => b.cover_i === testCoverI)).toBe(true);
+    expect(body.books.some((b: { id: string }) => b.id === testVolumeId)).toBe(
+      true,
+    );
   });
 
   it("should edit book reading status with 200", async () => {
@@ -133,7 +141,7 @@ describe("Bookshelf Operations (E2E)", () => {
         authorization: `Bearer ${accessToken}`,
       },
       payload: {
-        cover_i: testCoverI,
+        id: testVolumeId,
         readingStatus: "READING",
       },
     });
@@ -152,7 +160,7 @@ describe("Bookshelf Operations (E2E)", () => {
         authorization: `Bearer ${accessToken}`,
       },
       payload: {
-        cover_i: testCoverI,
+        id: testVolumeId,
         currentPage: 88,
       },
     });
@@ -171,7 +179,7 @@ describe("Bookshelf Operations (E2E)", () => {
         authorization: `Bearer ${accessToken}`,
       },
       payload: {
-        cover_i: testCoverI,
+        id: testVolumeId,
       },
     });
 
@@ -188,8 +196,10 @@ describe("Bookshelf Operations (E2E)", () => {
         authorization: `Bearer ${accessToken}`,
       },
     });
-    
+
     const checkBody = checkResponse.json();
-    expect(checkBody.books.some((b: { cover_i: number }) => b.cover_i === testCoverI)).toBe(false);
+    expect(
+      checkBody.books.some((b: { id: string }) => b.id === testVolumeId),
+    ).toBe(false);
   });
 });

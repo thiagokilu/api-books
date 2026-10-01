@@ -3,7 +3,7 @@ import type { UsersRepository } from "../repositories/users-repository";
 
 export interface IEditBookReadingStatusRequest {
   userId: string;
-  cover_i: number;
+  id: string;
   readingStatus: "WANT_TO_READ" | "READING" | "COMPLETED";
 }
 

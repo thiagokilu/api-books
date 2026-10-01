@@ -1,15 +1,14 @@
 import { z } from "zod";
 
-export const addBookShelfSchema = z.object({
+const addBookShelfByIdSchema = z.object({
+  id: z.string().min(1, "Book ID is required"),
   title: z.string().min(1, "Title is required"),
-  author_name: z
-    .array(z.string())
-    .min(1, "At least one author name is required"),
-  cover_i: z
-    .number()
-    .int()
-    .nonnegative("Cover ID must be a non-negative integer"),
+  authors: z.array(z.string()).min(1, "At least one author name is required"),
+  coverUrl: z.string().url().optional(),
+  pageCount: z.number().int().positive().optional(),
 });
+
+export const addBookShelfSchema = addBookShelfByIdSchema;
 
 export const addBookShelfSuccessResponseSchema = z.object({
   message: z.string(),

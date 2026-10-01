@@ -12,9 +12,10 @@ export const showPublicBookShelfSuccessResponseSchema = z.object({
   }),
   books: z.array(
     z.object({
+      id: z.string(),
       title: z.string(),
-      author_name: z.array(z.string()),
-      cover_i: z.number().int().nonnegative(),
+      authors: z.array(z.string()),
+      coverUrl: z.string().url().optional(),
       status: z.enum(["WANT_TO_READ", "READING", "COMPLETED"]),
       currentPage: z.number().int().nonnegative().optional(),
       totalPages: z.number().int().nonnegative().optional(),

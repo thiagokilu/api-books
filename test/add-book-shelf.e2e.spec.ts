@@ -82,9 +82,10 @@ describe("Add Book to Shelf (E2E)", () => {
       url: "/add-book-shelf",
       headers: { authorization: `Bearer ${accessToken}` },
       payload: {
+        id: `google-books-id-${runId}`,
         title: `Clean Code ${runId}`, // evita colisão de unicidade entre runs
-        author_name: ["Robert C. Martin"],
-        cover_i: 12345,
+        authors: ["Robert C. Martin"],
+        coverUrl: "https://example.com/cover.jpg",
       },
     });
 
@@ -99,9 +100,10 @@ describe("Add Book to Shelf (E2E)", () => {
       method: "POST",
       url: "/add-book-shelf",
       payload: {
+        id: "google-books-id-123",
         title: "Clean Code",
-        author_name: ["Robert C. Martin"],
-        cover_i: 12345,
+        authors: ["Robert C. Martin"],
+        coverUrl: "https://example.com/cover.jpg",
       },
     });
 

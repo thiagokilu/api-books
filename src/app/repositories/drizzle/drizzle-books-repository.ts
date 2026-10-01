@@ -5,16 +5,16 @@ import type { addBookToShelf, BooksRepository } from "../books-repository";
 
 export class DrizzleBooksRepository implements BooksRepository {
   async addBookToShelf(data: addBookToShelf): Promise<void> {
-    const externalId = String(data.cover_i);
+    const externalId = data.id;
 
     await db
       .insert(booksTable)
       .values({
         externalId,
         title: data.title,
-        author: data.author_name.join(", "),
+        author: data.authors.join(", "),
         totalPages: data.totalPages,
-        coverUrl: `https://covers.openlibrary.org/b/id/${data.cover_i}-M.jpg`,
+        coverUrl: data.coverUrl,
       })
       .onConflictDoNothing({ target: booksTable.externalId });
 
@@ -41,9 +41,9 @@ export class DrizzleBooksRepository implements BooksRepository {
 
   async removeBookFromShelf(data: {
     userId: string;
-    cover_i: number;
+    id: string;
   }): Promise<void> {
-    const externalId = String(data.cover_i);
+    const externalId = data.id;
 
     const book = await db.query.booksTable.findFirst({
       where: { externalId },
@@ -82,11 +82,12 @@ export class DrizzleBooksRepository implements BooksRepository {
       .filter((userBook) => userBook.book)
       .map((userBook) => ({
         userId: data.userId,
+        id: userBook.book!.externalId,
         title: userBook.book!.title,
-        author_name: userBook.book!.author
-          ? userBook.book!.author.split(", ")
-          : [],
-        cover_i: Number.parseInt(userBook.book!.externalId, 10),
+        authors: userBook.book!.author ? userBook.book!.author.split(", ") : [],
+        ...(userBook.book!.coverUrl
+          ? { coverUrl: userBook.book!.coverUrl }
+          : {}),
         status: userBook.status as "WANT_TO_READ" | "READING" | "COMPLETED",
         currentPage: userBook.currentPage,
         totalPages: userBook.book!.totalPages,
@@ -95,10 +96,10 @@ export class DrizzleBooksRepository implements BooksRepository {
 
   async editReadingStatus(data: {
     userId: string;
-    cover_i: number;
+    id: string;
     readingStatus: string;
   }): Promise<void> {
-    const externalId = String(data.cover_i);
+    const externalId = data.id;
 
     const book = await db.query.booksTable.findFirst({
       where: { externalId },
@@ -122,10 +123,10 @@ export class DrizzleBooksRepository implements BooksRepository {
 
   async editBookCurrentPage(data: {
     userId: string;
-    cover_i: number;
+    id: string;
     currentPage: number;
   }): Promise<void> {
-    const externalId = String(data.cover_i);
+    const externalId = data.id;
 
     const book = await db.query.booksTable.findFirst({
       where: { externalId },

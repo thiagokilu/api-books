@@ -3,7 +3,7 @@ import type { addBookToShelf, BooksRepository } from "../books-repository";
 export class InMemoryBooksRepository implements BooksRepository {
   addBookToShelf(data: addBookToShelf): Promise<void> {
     const userBooks = this.store.get(data.userId) ?? [];
-    if (!userBooks.some((book) => book.cover_i === data.cover_i)) {
+    if (!userBooks.some((book) => book.id === data.id)) {
       userBooks.push({
         ...data,
         status: data.status ?? "WANT_TO_READ",
@@ -16,13 +16,13 @@ export class InMemoryBooksRepository implements BooksRepository {
   }
   removeBookFromShelf(data: {
     userId: string;
-    cover_i: number;
+    id: string;
   }): Promise<void> {
-    const { userId, cover_i } = data;
+    const { userId, id } = data;
     const userBooks = this.store.get(userId);
     if (userBooks) {
       const remainingBooks = userBooks.filter(
-        (book) => book.cover_i !== cover_i,
+        (book) => book.id !== id,
       );
       if (remainingBooks.length === 0) {
         this.store.delete(userId);
@@ -39,14 +39,14 @@ export class InMemoryBooksRepository implements BooksRepository {
 
   async editReadingStatus(data: {
     userId: string;
-    cover_i: number;
+    id: string;
     readingStatus: "WANT_TO_READ" | "READING" | "COMPLETED";
   }): Promise<void> {
-    const { userId, cover_i, readingStatus } = data;
+    const { userId, id, readingStatus } = data;
     const userBooks = this.store.get(userId);
 
     if (userBooks) {
-      const bookIndex = userBooks.findIndex((book) => book.cover_i === cover_i);
+      const bookIndex = userBooks.findIndex((book) => book.id === id);
       if (bookIndex !== -1) {
         const book = userBooks[bookIndex];
         if (book) {
@@ -60,14 +60,14 @@ export class InMemoryBooksRepository implements BooksRepository {
 
   async editBookCurrentPage(data: {
     userId: string;
-    cover_i: number;
+    id: string;
     currentPage: number;
   }): Promise<void> {
-    const { userId, cover_i, currentPage } = data;
+    const { userId, id, currentPage } = data;
     const userBooks = this.store.get(userId);
 
     if (userBooks) {
-      const bookIndex = userBooks.findIndex((book) => book.cover_i === cover_i);
+      const bookIndex = userBooks.findIndex((book) => book.id === id);
       if (bookIndex !== -1) {
         const book = userBooks[bookIndex];
         if (book) {

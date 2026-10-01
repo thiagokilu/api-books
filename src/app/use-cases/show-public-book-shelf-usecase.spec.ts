@@ -26,9 +26,9 @@ describe("showPublicBookShelfUseCase", () => {
 
     const book = {
       userId: user.id,
+      id: "clean-code",
       title: "Clean Code",
-      author_name: ["Robert C. Martin"],
-      cover_i: 8065615,
+      authors: ["Robert C. Martin"],
       status: "READING" as const,
       currentPage: 50,
       totalPages: 200,
@@ -50,9 +50,9 @@ describe("showPublicBookShelfUseCase", () => {
       },
       books: [
         {
+          id: "clean-code",
           title: "Clean Code",
-          author_name: ["Robert C. Martin"],
-          cover_i: 8065615,
+          authors: ["Robert C. Martin"],
           status: "READING",
           currentPage: 50,
           totalPages: 200,
@@ -73,7 +73,7 @@ describe("showPublicBookShelfUseCase", () => {
   });
 
   it("should return empty books array when user has no books", async () => {
-     await usersRepository.create({
+    await usersRepository.create({
       name: "Ana",
       username: "ana",
       email: "ana@example.com",

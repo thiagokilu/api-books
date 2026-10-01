@@ -2,7 +2,7 @@ import type { BooksRepository } from "../repositories/books-repository";
 import type { UsersRepository } from "../repositories/users-repository";
 
 export async function removeBookShelfUseCase(
-  data: { userId: string; cover_i: number },
+  data: { userId: string; id: string },
   booksRepository: BooksRepository,
   usersRepository: UsersRepository,
 ): Promise<void> {

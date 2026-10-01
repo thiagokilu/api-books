@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const editBookReadingPageSchema = z.object({
-  cover_i: z.number(),
+  id: z.string().min(1, "Book ID is required"),
   currentPage: z.number().int().nonnegative(),
 });
 

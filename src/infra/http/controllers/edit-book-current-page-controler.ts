@@ -6,13 +6,13 @@ export async function editBookReadingPageController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { cover_i, currentPage } = request.body as EditBookReadingPageSchema;
+  const { id, currentPage } = request.body as EditBookReadingPageSchema;
 
   try {
     const editBookReadingPage = makeEditBookReadingPageUseCase();
     await editBookReadingPage({
       userId: request.userId,
-      cover_i,
+      id,
       currentPage,
     });
 

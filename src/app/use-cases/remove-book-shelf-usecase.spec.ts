@@ -21,14 +21,14 @@ describe("removeBookShelfUseCase", () => {
     });
     const book = {
       userId: user.id,
+      id: "clean-code",
       title: "Clean Code",
-      author_name: ["Robert C. Martin"],
-      cover_i: 8065615,
+      authors: ["Robert C. Martin"],
     };
 
     await booksRepository.addBookToShelf(book);
     await removeBookShelfUseCase(
-      { userId: user.id, cover_i: book.cover_i },
+      { userId: user.id, id: book.id },
       booksRepository,
       usersRepository,
     );
@@ -41,7 +41,7 @@ describe("removeBookShelfUseCase", () => {
   it("should not be able to remove a book for a non-existent user", async () => {
     await expect(
       removeBookShelfUseCase(
-        { userId: "non-existent-user", cover_i: 8065615 },
+        { userId: "non-existent-user", id: "clean-code" },
         booksRepository,
         usersRepository,
       ),
