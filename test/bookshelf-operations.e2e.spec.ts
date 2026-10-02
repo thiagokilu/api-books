@@ -27,7 +27,7 @@ describe("Bookshelf Operations (E2E)", () => {
     await db.delete(booksTable).where(eq(booksTable.externalId, testVolumeId));
 
     const signUpResponse = await app.inject({
-      method: "PUT",
+      method: "POST",
       url: "/sign-up",
       payload: {
         name: "Shelf User",
@@ -135,7 +135,7 @@ describe("Bookshelf Operations (E2E)", () => {
 
   it("should edit book reading status with 200", async () => {
     const response = await app.inject({
-      method: "POST",
+      method: "PUT",
       url: "/edit-book-reading-status",
       headers: {
         authorization: `Bearer ${accessToken}`,
