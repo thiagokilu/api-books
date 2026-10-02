@@ -5,6 +5,7 @@ export interface IEditBookReadingStatusRequest {
   userId: string;
   id: string;
   readingStatus: "WANT_TO_READ" | "READING" | "COMPLETED";
+  currentPage: number;
 }
 
 export async function editBookReadingStatusUseCase(

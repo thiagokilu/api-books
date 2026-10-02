@@ -27,7 +27,7 @@ describe("Bookshelf Operations (E2E)", () => {
     await db.delete(booksTable).where(eq(booksTable.externalId, testVolumeId));
 
     const signUpResponse = await app.inject({
-      method: "POST",
+      method: "PUT",
       url: "/sign-up",
       payload: {
         name: "Shelf User",
@@ -143,6 +143,7 @@ describe("Bookshelf Operations (E2E)", () => {
       payload: {
         id: testVolumeId,
         readingStatus: "READING",
+        currentPage: 88,
       },
     });
 
@@ -150,25 +151,22 @@ describe("Bookshelf Operations (E2E)", () => {
     expect(response.json()).toEqual({
       message: "Book reading status updated successfully",
     });
-  });
 
-  it("should edit book current reading page with 200", async () => {
-    const response = await app.inject({
-      method: "POST",
-      url: "/edit-book-reading-page",
+    const shelfResponse = await app.inject({
+      method: "GET",
+      url: "/show-book-shelf",
       headers: {
         authorization: `Bearer ${accessToken}`,
       },
-      payload: {
-        id: testVolumeId,
-        currentPage: 88,
-      },
     });
 
-    expect(response.statusCode).toBe(200);
-    const body = response.json();
-    expect(body).toHaveProperty("message", "Current page updated successfully");
-    expect(body).toHaveProperty("currentPage", 88);
+    const updatedBook = shelfResponse
+      .json()
+      .books.find((book: { id: string }) => book.id === testVolumeId);
+    expect(updatedBook).toMatchObject({
+      status: "READING",
+      currentPage: 88,
+    });
   });
 
   it("should remove book from bookshelf with 200", async () => {

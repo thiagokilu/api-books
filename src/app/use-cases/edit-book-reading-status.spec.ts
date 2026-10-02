@@ -32,6 +32,7 @@ describe("editBookReadingStatusUseCase", () => {
         userId: user.id,
         id: "clean-code",
         readingStatus: "READING",
+        currentPage: 42,
       },
       booksRepository,
       usersRepository,
@@ -39,6 +40,7 @@ describe("editBookReadingStatusUseCase", () => {
 
     const books = await booksRepository.showBooksFromShelf({ userId: user.id });
     expect(books[0]?.status).toBe("READING");
+    expect(books[0]?.currentPage).toBe(42);
   });
 
   it("should throw an error if the user does not exist", async () => {
@@ -48,6 +50,7 @@ describe("editBookReadingStatusUseCase", () => {
           userId: "non-existent-user-id",
           id: "clean-code",
           readingStatus: "READING",
+          currentPage: 0,
         },
         booksRepository,
         usersRepository,

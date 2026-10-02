@@ -7,7 +7,7 @@ import {
 } from "../schemas/edit-book-reading-status-schema";
 import { isAuth } from "../middlewares/isAuth";
 export function editBookReadingStatusRoute(app: FastifyInstance) {
-  app.post(
+  app.put(
     "/edit-book-reading-status",
     {
       preHandler: isAuth,
@@ -18,12 +18,13 @@ export function editBookReadingStatusRoute(app: FastifyInstance) {
         },
       },
       schema: {
-        summary: "edit a book reading status in the user's bookshelf",
+        summary:
+          "edit a book reading status and current page in the user's bookshelf",
         tags: ["Bookshelf"],
         security: [{ bearerAuth: [] }],
         body: editBookReadingStatusBodySchema,
         response: {
-          201: editBookReadingStatusSuccessResponseSchema,
+          200: editBookReadingStatusSuccessResponseSchema,
           409: editBookReadingStatusErrorResponseSchema,
         },
       },

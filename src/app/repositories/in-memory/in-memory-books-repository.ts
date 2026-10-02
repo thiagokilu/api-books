@@ -14,16 +14,11 @@ export class InMemoryBooksRepository implements BooksRepository {
     this.store.set(data.userId, userBooks);
     return Promise.resolve();
   }
-  removeBookFromShelf(data: {
-    userId: string;
-    id: string;
-  }): Promise<void> {
+  removeBookFromShelf(data: { userId: string; id: string }): Promise<void> {
     const { userId, id } = data;
     const userBooks = this.store.get(userId);
     if (userBooks) {
-      const remainingBooks = userBooks.filter(
-        (book) => book.id !== id,
-      );
+      const remainingBooks = userBooks.filter((book) => book.id !== id);
       if (remainingBooks.length === 0) {
         this.store.delete(userId);
       } else {
@@ -41,8 +36,9 @@ export class InMemoryBooksRepository implements BooksRepository {
     userId: string;
     id: string;
     readingStatus: "WANT_TO_READ" | "READING" | "COMPLETED";
+    currentPage: number;
   }): Promise<void> {
-    const { userId, id, readingStatus } = data;
+    const { userId, id, readingStatus, currentPage } = data;
     const userBooks = this.store.get(userId);
 
     if (userBooks) {
@@ -51,6 +47,7 @@ export class InMemoryBooksRepository implements BooksRepository {
         const book = userBooks[bookIndex];
         if (book) {
           book.status = readingStatus;
+          book.currentPage = currentPage;
           this.store.set(userId, userBooks);
         }
       }

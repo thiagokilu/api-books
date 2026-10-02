@@ -26,6 +26,7 @@ export interface BooksRepository {
     userId: string;
     id: string;
     readingStatus: "WANT_TO_READ" | "READING" | "COMPLETED";
+    currentPage: number;
   }): Promise<void>;
   editBookCurrentPage(data: {
     userId: string;

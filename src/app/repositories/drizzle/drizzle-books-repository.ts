@@ -148,7 +148,8 @@ export class DrizzleBooksRepository implements BooksRepository {
   async editReadingStatus(data: {
     userId: string;
     id: string;
-    readingStatus: string;
+    readingStatus: "WANT_TO_READ" | "READING" | "COMPLETED";
+    currentPage: number;
   }): Promise<void> {
     const externalId = data.id;
 
@@ -163,7 +164,7 @@ export class DrizzleBooksRepository implements BooksRepository {
 
     await db
       .update(userLibraryTable)
-      .set({ status: data.readingStatus })
+      .set({ status: data.readingStatus, currentPage: data.currentPage })
       .where(
         and(
           eq(userLibraryTable.userId, data.userId),

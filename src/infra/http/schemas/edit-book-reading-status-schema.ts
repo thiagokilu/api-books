@@ -3,6 +3,7 @@ import { z } from "zod";
 export const editBookReadingStatusBodySchema = z.object({
   id: z.string().min(1, "Book ID is required"),
   readingStatus: z.enum(["WANT_TO_READ", "READING", "COMPLETED"]),
+  currentPage: z.number().int().nonnegative(),
 });
 
 export const editBookReadingStatusSuccessResponseSchema = z.object({
