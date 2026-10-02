@@ -105,8 +105,13 @@ describe("Get User Profile (E2E)", () => {
     const body = response.json();
     expect(body).toHaveProperty("message", "User profile retrieved");
     expect(body.user).toEqual({
+      id: userId,
+      name: "Profile User",
       username: testUsername,
       email: testEmail,
+      bio: null,
+      profileImageUrl: null,
+      emailVerified: true,
     });
   });
 

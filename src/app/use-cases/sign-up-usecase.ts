@@ -11,6 +11,7 @@ export interface ISignUpUseCaseRequest {
   email: string;
   password: string;
   bio?: string | undefined;
+  profileImageUrl?: string | undefined;
 }
 
 export interface ISignUpUseCaseResponse {
@@ -19,7 +20,14 @@ export interface ISignUpUseCaseResponse {
 }
 
 export async function signUpUseCase(
-  { email, name, username, password, bio }: ISignUpUseCaseRequest,
+  {
+    email,
+    name,
+    username,
+    password,
+    bio,
+    profileImageUrl,
+  }: ISignUpUseCaseRequest,
   usersRepository: UsersRepository,
 ): Promise<ISignUpUseCaseResponse> {
   if (!email || !name || !username || !password) {
@@ -43,6 +51,7 @@ export async function signUpUseCase(
     username,
     password: hashedPassword,
     bio: bio ?? null,
+    profileImageUrl: profileImageUrl ?? null,
   });
 
   return {

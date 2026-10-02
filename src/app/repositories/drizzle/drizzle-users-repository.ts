@@ -20,6 +20,7 @@ export class DrizzleUsersRepository implements UsersRepository {
         username: data.username,
         password: data.password,
         bio: data.bio ?? null,
+        profileImageUrl: data.profileImageUrl ?? null,
       })
       .returning();
 

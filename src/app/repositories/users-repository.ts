@@ -5,9 +5,12 @@ export interface CreateUserData {
   email: string;
   password: string;
   bio?: string | null;
+  profileImageUrl?: string | null;
 }
 
-export type EditProfileData = Partial<Pick<CreateUserData, "name" | "bio">>;
+export type EditProfileData = Partial<
+  Pick<CreateUserData, "name" | "bio" | "profileImageUrl">
+>;
 
 export interface User {
   id: string;
@@ -16,6 +19,7 @@ export interface User {
   email: string;
   password: string;
   bio?: string | null;
+  profileImageUrl?: string | null;
   emailVerified: boolean;
 }
 

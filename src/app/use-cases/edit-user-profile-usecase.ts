@@ -9,17 +9,19 @@ export interface IEditUserProfileUseCaseRequest {
   id: string;
   name?: string;
   bio?: string;
+  profileImageUrl?: string;
 }
 
 export interface IEditUserProfileUseCaseResponse {
   name?: string;
   bio?: string;
+  profileImageUrl?: string;
   username: string;
   email: string;
 }
 
 export async function editUserProfileUseCase(
-  { id, name, bio }: IEditUserProfileUseCaseRequest,
+  { id, name, bio, profileImageUrl }: IEditUserProfileUseCaseRequest,
   usersRepository: UsersRepository,
 ): Promise<IEditUserProfileUseCaseResponse> {
   const user = await usersRepository.findById(id);
@@ -38,12 +40,17 @@ export async function editUserProfileUseCase(
     data.bio = bio;
   }
 
+  if (profileImageUrl !== undefined) {
+    data.profileImageUrl = profileImageUrl;
+  }
+
   const editedUser = await usersRepository.editProfile(id, data);
 
   return {
     ...stripUndefined({
       name: editedUser.name,
       bio: editedUser.bio ?? undefined,
+      profileImageUrl: editedUser.profileImageUrl ?? undefined,
     }),
     username: editedUser.username,
     email: editedUser.email,

@@ -31,8 +31,13 @@ describe("getUserProfileUseCase", () => {
     );
 
     expect(result).toMatchObject({
+      id: createdUser.id,
+      name: "John Doe",
       username: "johndoe",
       email: "john.doe@example.com",
+      bio: "I am John Doe",
+      profileImageUrl: null,
+      emailVerified: false,
     });
   });
 

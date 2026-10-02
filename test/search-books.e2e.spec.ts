@@ -1,9 +1,37 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  vi,
+} from "vitest";
 import { app } from "../src/server";
 import { rateLimitRedis } from "../src/infra/lib/rateLimit";
 
 describe("Search Books (E2E)", () => {
   beforeAll(async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          totalItems: 1,
+          items: [
+            {
+              id: "clean-code",
+              volumeInfo: {
+                title: "Clean Code",
+                authors: ["Robert C. Martin"],
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    );
     await app.ready();
   });
 
@@ -17,6 +45,7 @@ describe("Search Books (E2E)", () => {
 
   afterAll(async () => {
     await app.close();
+    vi.restoreAllMocks();
   });
 
   it("should search books by query successfully and return 200", async () => {
