@@ -35,6 +35,26 @@ describe("editUserProfileUseCase", () => {
     });
   });
 
+  it("should be able to edit the user's username", async () => {
+    const user = await usersRepository.create({
+      name: "John Doe",
+      username: "johndoe",
+      email: "john.doe@example.com",
+      password: "password123",
+    });
+
+    const result = await editUserProfileUseCase(
+      {
+        id: user.id,
+        username: "janedoe",
+      },
+      usersRepository,
+    );
+
+    expect(result.username).toBe("janedoe");
+    expect((await usersRepository.findById(user.id))?.username).toBe("janedoe");
+  });
+
   it("should not be able to edit a non-existent user's profile", async () => {
     await expect(
       editUserProfileUseCase(

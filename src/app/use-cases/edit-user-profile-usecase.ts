@@ -8,6 +8,7 @@ import { stripUndefined } from "../../infra/lib/stripUndefined";
 export interface IEditUserProfileUseCaseRequest {
   id: string;
   name?: string;
+  username?: string;
   bio?: string;
   profileImageUrl?: string;
 }
@@ -21,7 +22,7 @@ export interface IEditUserProfileUseCaseResponse {
 }
 
 export async function editUserProfileUseCase(
-  { id, name, bio, profileImageUrl }: IEditUserProfileUseCaseRequest,
+  { id, name, username, bio, profileImageUrl }: IEditUserProfileUseCaseRequest,
   usersRepository: UsersRepository,
 ): Promise<IEditUserProfileUseCaseResponse> {
   const user = await usersRepository.findById(id);
@@ -34,6 +35,10 @@ export async function editUserProfileUseCase(
 
   if (name !== undefined) {
     data.name = name;
+  }
+
+  if (username !== undefined) {
+    data.username = username;
   }
 
   if (bio !== undefined) {

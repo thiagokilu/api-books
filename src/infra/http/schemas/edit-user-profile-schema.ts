@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const editUserProfileSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
+  username: z.string().min(1, "Username is required").optional(),
   bio: z.string().optional(),
   profileImageUrl: z.string().url().optional(),
 });

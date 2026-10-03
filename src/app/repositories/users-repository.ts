@@ -9,7 +9,7 @@ export interface CreateUserData {
 }
 
 export type EditProfileData = Partial<
-  Pick<CreateUserData, "name" | "bio" | "profileImageUrl">
+  Pick<CreateUserData, "name" | "username" | "bio" | "profileImageUrl">
 >;
 
 export interface User {

@@ -8,14 +8,17 @@ export async function editUserProfileController(
   reply: FastifyReply,
 ) {
   try {
-    const { name, bio } = request.body as EditUserProfileBodySchema;
+    const { name, username, bio, profileImageUrl } =
+      request.body as EditUserProfileBodySchema;
     const editUserProfile = makeEditUserProfileUseCase();
 
     const updatedUser = await editUserProfile(
       stripUndefined({
         id: request.userId,
         name,
+        username,
         bio,
+        profileImageUrl,
       }),
     );
 
