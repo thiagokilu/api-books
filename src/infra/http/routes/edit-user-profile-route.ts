@@ -8,7 +8,7 @@ import {
 import { isAuth } from "../middlewares/isAuth";
 
 export function editUserProfileRoute(app: FastifyInstance) {
-  app.post(
+  app.patch(
     "/edit",
     {
       preHandler: isAuth,

@@ -77,7 +77,7 @@ describe("Edit User Profile (E2E)", () => {
     accessToken = signInResponse.json().accessToken;
   });
 
-    beforeEach(async () => {
+  beforeEach(async () => {
     // limpa rate-limit só das chaves relacionadas a este usuário/execução
     const keys = await rateLimitRedis.keys(
       `api-books:rate-limit:*${testEmail}*`,
@@ -98,7 +98,7 @@ describe("Edit User Profile (E2E)", () => {
 
   it("should edit user profile (name) successfully and return 200", async () => {
     const response = await app.inject({
-      method: "POST",
+      method: "PATCH",
       url: "/edit",
       headers: {
         authorization: `Bearer ${accessToken}`,
@@ -114,7 +114,7 @@ describe("Edit User Profile (E2E)", () => {
 
   it("should edit user profile (bio) successfully and return 200", async () => {
     const response = await app.inject({
-      method: "POST",
+      method: "PATCH",
       url: "/edit",
       headers: {
         authorization: `Bearer ${accessToken}`,
@@ -130,7 +130,7 @@ describe("Edit User Profile (E2E)", () => {
 
   it("should edit user profile (name and bio) simultaneously and return 200", async () => {
     const response = await app.inject({
-      method: "POST",
+      method: "PATCH",
       url: "/edit",
       headers: {
         authorization: `Bearer ${accessToken}`,
@@ -147,7 +147,7 @@ describe("Edit User Profile (E2E)", () => {
 
   it("should return 401 when not authenticated", async () => {
     const response = await app.inject({
-      method: "POST",
+      method: "PATCH",
       url: "/edit",
       payload: {
         name: "Unauthenticated User",
@@ -159,7 +159,7 @@ describe("Edit User Profile (E2E)", () => {
 
   it("should return 401 when using an invalid token", async () => {
     const response = await app.inject({
-      method: "POST",
+      method: "PATCH",
       url: "/edit",
       headers: {
         authorization: "Bearer invalid.jwt.token",
