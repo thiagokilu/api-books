@@ -37,7 +37,9 @@ describe("Search Books (E2E)", () => {
 
   beforeEach(async () => {
     // limpa rate-limit de forma mais específica para este endpoint
-    const keys = await rateLimitRedis.keys("api-books:rate-limit:*books/search*");
+    const keys = await rateLimitRedis.keys(
+      "api-books:rate-limit:*books/search*",
+    );
     if (keys.length > 0) {
       await rateLimitRedis.del(...keys);
     }
@@ -61,6 +63,7 @@ describe("Search Books (E2E)", () => {
     expect(response.statusCode).toBe(200);
     const body = response.json();
     expect(body).toHaveProperty("total");
+    expect(body).toMatchObject({ page: 1, limit: 20, totalPages: 1 });
     expect(body).toHaveProperty("books");
     expect(Array.isArray(body.books)).toBe(true);
   });

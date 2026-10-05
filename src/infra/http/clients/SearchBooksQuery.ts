@@ -2,10 +2,11 @@ import type { GoogleBooksClient } from "../../../app/use-cases/search-books-usec
 
 export function makeGoogleBooksClient(): GoogleBooksClient {
   return {
-    async searchBooks(query: string) {
+    async searchBooks(query: string, startIndex: number, maxResults: number) {
       const params = new URLSearchParams({
         q: query,
-        maxResults: "20",
+        startIndex: String(startIndex),
+        maxResults: String(maxResults),
       });
 
       // Opcional, mas recomendado

@@ -2,10 +2,15 @@ import { z } from "zod";
 
 export const searchBooksSchema = z.object({
   query: z.string().min(1),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(40).default(20),
 });
 
 export const searchBooksSuccessResponseSchema = z.object({
   total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
   books: z.array(
     z.object({
       id: z.string(),

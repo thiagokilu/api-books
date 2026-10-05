@@ -38,8 +38,13 @@ describe("SearchBooksUseCase", () => {
     expect(googleBooksClient.searchBooks).toHaveBeenCalledTimes(1);
     expect(googleBooksClient.searchBooks).toHaveBeenCalledWith(
       "the lord of the rings",
+      0,
+      20,
     );
     expect(result.total).toBe(1);
+    expect(result.page).toBe(1);
+    expect(result.limit).toBe(20);
+    expect(result.totalPages).toBe(1);
     expect(result.books).toHaveLength(1);
     expect(result.books[0]?.title).toBe("The Lord of the Rings");
   });
@@ -49,8 +54,8 @@ describe("SearchBooksUseCase", () => {
       new Error("Failed to search books on Google Books"),
     );
 
-    await expect(
-      searchBooks({ query: "error-query" }),
-    ).rejects.toThrow("Failed to search books on Google Books");
+    await expect(searchBooks({ query: "error-query" })).rejects.toThrow(
+      "Failed to search books on Google Books",
+    );
   });
 });

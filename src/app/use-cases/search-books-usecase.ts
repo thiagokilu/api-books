@@ -1,5 +1,7 @@
 export interface ISearchBooksUseCaseRequest {
   query: string;
+  page?: number;
+  limit?: number;
 }
 
 // Formato bruto retornado pelo Google Books
@@ -30,7 +32,11 @@ export interface GoogleBooksSearchResponse {
 }
 
 export interface GoogleBooksClient {
-  searchBooks(query: string): Promise<GoogleBooksSearchResponse>;
+  searchBooks(
+    query: string,
+    startIndex: number,
+    maxResults: number,
+  ): Promise<GoogleBooksSearchResponse>;
 }
 
 // Formato que a sua API devolve
@@ -53,6 +59,9 @@ export interface Book {
 
 export interface ISearchBooksUseCaseResponse {
   total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
   books: Book[];
 }
 
@@ -92,11 +101,18 @@ function mapVolumeToBook(volume: GoogleBooksVolume): Book {
 export function searchBooksUseCase(googleBooksClient: GoogleBooksClient) {
   return async function searchBooks({
     query,
+    page = 1,
+    limit = 20,
   }: ISearchBooksUseCaseRequest): Promise<ISearchBooksUseCaseResponse> {
-    const data = await googleBooksClient.searchBooks(query);
+    const startIndex = (page - 1) * limit;
+
+    const data = await googleBooksClient.searchBooks(query, startIndex, limit);
 
     return {
       total: data.totalItems,
+      page,
+      limit,
+      totalPages: Math.ceil(data.totalItems / limit),
       books: (data.items ?? []).map(mapVolumeToBook),
     };
   };
